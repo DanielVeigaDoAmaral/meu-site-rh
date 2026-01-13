@@ -3,249 +3,319 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DVA-PRO | Gestão de Folha e Férias</title>
+    <title>DVA-PRO | Gestão Administrativa Completa</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;900&display=swap');
-        :root { --bg-dark: #0f172a; --accent-blue: #2563eb; }
+        :root { --bg-dark: #020617; --card-dark: #0f172a; --accent: #2563eb; }
         body { font-family: 'Inter', sans-serif; background-color: var(--bg-dark); color: #f1f5f9; margin: 0; }
-        .tab-content { display: none; }
-        .tab-content.active { display: block; }
-        .card-dark { background-color: #1e293b; border: 1px solid #334155; }
-
-        #holerite-preview-container {
-            display: none;
-            position: fixed;
-            inset: 0;
-            background: rgba(0,0,0,0.95);
-            z-index: 100;
-            overflow-y: auto;
-            padding: 2rem;
-        }
-
+        .tab-content { display: none; transition: all 0.3s ease; }
+        .tab-content.active { display: block; animation: fadeIn 0.3s ease; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+        .card-pro { background-color: var(--card-dark); border: 1px solid #1e293b; border-radius: 1.5rem; }
+        input, select { background: #1e293b !important; border: 1px solid #334155 !important; color: white !important; }
+        input:focus { border-color: var(--accent) !important; outline: none; ring: 2px var(--accent); }
+        
+        /* Estilos de Impressão */
         @media print {
             .no-print { display: none !important; }
-            body { background: white !important; color: black !important; padding: 0 !important; }
-            #holerite-preview-container { position: static; display: block !important; background: white; padding: 0; }
+            body { background: white !important; color: black !important; }
+            .print-only { display: block !important; }
             .holerite-page {
                 width: 100%;
-                max-width: 800px;
-                margin: 0 auto 20px auto;
-                border: 1px solid #000;
-                padding: 15px;
+                padding: 20px;
+                border: 2px solid #000;
+                margin-bottom: 30px;
                 page-break-after: always;
-                font-size: 10px !important;
                 color: black !important;
             }
-            .holerite-page table { width: 100%; border-collapse: collapse; }
-            .holerite-page th, .holerite-page td { border: 1px solid black; padding: 4px; }
+            .holerite-page table { width: 100%; border-collapse: collapse; margin: 10px 0; }
+            .holerite-page th, .holerite-page td { border: 1px solid black; padding: 5px; font-size: 11px; }
         }
     </style>
 </head>
 <body class="antialiased">
 
-    <!-- LOGIN -->
+    <!-- OVERLAY DE CARREGAMENTO -->
+    <div id="loader" class="fixed inset-0 bg-slate-950 z-[200] flex items-center justify-center transition-opacity duration-500">
+        <div class="flex flex-col items-center">
+            <span class="bg-blue-600 text-white px-6 py-2 rounded-lg font-black italic text-4xl animate-pulse">DVA-PRO</span>
+            <p class="text-slate-500 text-xs mt-4 font-bold tracking-[0.3em] uppercase">Carregando Sistema...</p>
+        </div>
+    </div>
+
+    <!-- AUTH CONTAINER -->
     <section id="auth-container" class="fixed inset-0 bg-slate-950 flex items-center justify-center p-4 z-[100]">
-        <div class="bg-slate-900 w-full max-w-md rounded-3xl shadow-2xl p-8 border border-slate-800">
-            <div class="text-center mb-8">
-                <span class="bg-blue-600 text-white px-5 py-2 rounded-lg font-black italic tracking-tighter text-3xl shadow-lg shadow-blue-500/20">DVA-PRO</span>
-                <p class="text-slate-500 text-[10px] font-bold uppercase mt-6 tracking-widest">Controle Administrativo</p>
+        <div class="bg-slate-900 w-full max-w-md rounded-[2.5rem] shadow-2xl p-10 border border-slate-800">
+            <div class="text-center mb-10">
+                <span class="bg-blue-600 text-white px-6 py-2 rounded-xl font-black italic tracking-tighter text-4xl shadow-2xl shadow-blue-500/20">DVA-PRO</span>
+                <p class="text-slate-500 text-[10px] font-black uppercase mt-8 tracking-[0.4em]">Enterprise Portal</p>
             </div>
             <form id="form-login" class="space-y-4">
-                <input type="text" id="login-user" placeholder="Usuário" required class="w-full p-4 bg-slate-800 border border-slate-700 rounded-2xl font-bold text-white outline-none focus:ring-2 ring-blue-500">
-                <input type="password" id="login-pass" placeholder="Senha" required class="w-full p-4 bg-slate-800 border border-slate-700 rounded-2xl font-bold text-white outline-none focus:ring-2 ring-blue-500">
-                <button type="submit" class="w-full bg-blue-600 text-white p-4 rounded-2xl font-black uppercase hover:bg-blue-500 transition-all">Acessar Painel</button>
+                <input type="text" id="login-user" placeholder="USUÁRIO" required class="w-full p-5 rounded-2xl font-bold">
+                <input type="password" id="login-pass" placeholder="SENHA" required class="w-full p-5 rounded-2xl font-bold">
+                <button type="submit" class="w-full bg-blue-600 hover:bg-blue-500 text-white p-5 rounded-2xl font-black uppercase tracking-widest transition-all transform hover:scale-[1.02]">Entrar no Painel</button>
             </form>
-            <div class="mt-6 text-center">
-                <p class="text-slate-500 text-xs">Novo por aqui? <a href="#" class="text-blue-500 font-bold hover:underline">Crie uma conta</a></p>
-            </div>
+            <p class="text-center text-slate-600 text-[10px] mt-8 font-bold uppercase">Software de Gestão de Folha v2.0</p>
         </div>
     </section>
 
     <!-- APP PRINCIPAL -->
     <div id="main-app" class="hidden min-h-screen flex flex-col">
-        <header class="no-print bg-slate-900 border-b border-slate-800 sticky top-0 z-40">
-            <div class="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
-                <div class="flex items-center gap-3">
-                    <span class="bg-blue-600 px-3 py-1 rounded font-black italic tracking-tighter">DVA-PRO</span>
-                    <h1 id="topEmpresaNome" class="text-xs font-bold uppercase text-slate-400 italic">EMPRESA</h1>
+        <header class="no-print bg-slate-900/50 backdrop-blur-xl border-b border-slate-800 sticky top-0 z-40">
+            <div class="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
+                <div class="flex items-center gap-4 cursor-pointer" onclick="showTab('tab-func')">
+                    <span class="bg-blue-600 px-4 py-1.5 rounded-lg font-black italic tracking-tighter text-xl">DVA</span>
+                    <div class="hidden md:block">
+                        <h1 id="topEmpresaNome" class="text-xs font-black uppercase text-white tracking-tighter">EMPRESA EXEMPLO LTDA</h1>
+                        <p class="text-[9px] text-slate-500 font-bold uppercase tracking-widest">Painel Administrativo</p>
+                    </div>
                 </div>
-                <nav class="flex gap-4">
-                    <button onclick="showTab('tab-func')" class="text-[10px] font-black uppercase hover:text-blue-500 transition">Equipe</button>
-                    <button onclick="showTab('tab-folha')" class="text-[10px] font-black uppercase hover:text-blue-500 transition">Folha Mensal</button>
-                    <button onclick="showTab('tab-ferias')" class="text-[10px] font-black uppercase hover:text-blue-500 transition text-yellow-500">Férias</button>
-                    <button onclick="showTab('tab-hist')" class="text-[10px] font-black uppercase hover:text-blue-500 transition">Arquivo</button>
-                    <button onclick="showTab('tab-config')" class="text-[10px] font-black uppercase hover:text-blue-500 transition text-slate-500">Ajustes</button>
-                    <button onclick="logout()" class="px-3 py-1 bg-red-500/10 text-red-500 rounded-lg text-[10px] font-black uppercase">Sair</button>
+                <nav class="flex items-center gap-2 md:gap-6">
+                    <button onclick="showTab('tab-func')" class="nav-link text-[10px] font-black uppercase px-3 py-2 rounded-lg hover:bg-slate-800 transition">Equipe</button>
+                    <button onclick="showTab('tab-folha')" class="nav-link text-[10px] font-black uppercase px-3 py-2 rounded-lg hover:bg-slate-800 transition">Folha</button>
+                    <button onclick="showTab('tab-ferias')" class="nav-link text-[10px] font-black uppercase px-3 py-2 rounded-lg hover:bg-yellow-500/10 text-yellow-500 transition">Férias</button>
+                    <button onclick="showTab('tab-hist')" class="nav-link text-[10px] font-black uppercase px-3 py-2 rounded-lg hover:bg-slate-800 transition">Arquivo</button>
+                    <button onclick="showTab('tab-config')" class="nav-link p-2 text-slate-500 hover:text-white"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg></button>
+                    <button onclick="logout()" class="ml-2 bg-red-500/10 text-red-500 p-2 rounded-lg hover:bg-red-500 hover:text-white transition"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg></button>
                 </nav>
             </div>
         </header>
 
-        <main class="max-w-7xl mx-auto w-full p-6 no-print">
+        <main class="max-w-7xl mx-auto w-full p-6 no-print flex-grow">
             
             <!-- ABA: EQUIPE -->
             <section id="tab-func" class="tab-content active">
-                <div class="flex justify-between items-center mb-6">
-                    <h2 class="text-2xl font-black uppercase italic tracking-tighter">Gestão de Pessoal</h2>
-                    <button onclick="abrirModalFunc()" class="bg-blue-600 text-white px-6 py-2 rounded-xl font-bold text-xs uppercase">+ Novo Funcionário</button>
+                <div class="flex justify-between items-end mb-8">
+                    <div>
+                        <h2 class="text-4xl font-black uppercase italic tracking-tighter">Equipe Profissional</h2>
+                        <p class="text-slate-500 font-bold text-xs uppercase tracking-widest mt-1">Gestão de contratos e remuneração</p>
+                    </div>
+                    <button onclick="abrirModalFunc()" class="bg-blue-600 hover:bg-blue-500 text-white px-8 py-4 rounded-2xl font-black text-xs uppercase shadow-xl shadow-blue-500/20 transition-all">+ Novo Cadastro</button>
                 </div>
-                <div id="lista-funcionarios" class="grid grid-cols-1 md:grid-cols-3 gap-4"></div>
+                <div id="lista-funcionarios" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <!-- Cards via JS -->
+                </div>
             </section>
 
-            <!-- ABA: LANÇAR FOLHA -->
+            <!-- ABA: FOLHA MENSAL -->
             <section id="tab-folha" class="tab-content">
-                <div class="card-dark rounded-3xl p-6 mb-6">
-                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
-                        <div class="flex flex-col gap-1">
-                            <label class="text-[9px] font-black text-slate-500 uppercase">Período e Tipo</label>
-                            <select id="folha-tipo" class="p-3 bg-slate-800 border border-slate-700 rounded-xl text-xs font-bold text-white outline-none">
+                <div class="card-pro p-8 mb-8">
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-6 items-end">
+                        <div class="flex flex-col gap-2">
+                            <label class="text-[10px] font-black text-slate-500 uppercase tracking-widest">Tipo de Folha</label>
+                            <select id="folha-tipo" class="p-4 rounded-2xl font-bold text-sm">
                                 <option value="MENSAL (DIA 05)">MENSAL (DIA 05)</option>
                                 <option value="ADIANTAMENTO (40%)">ADIANTAMENTO (40%)</option>
                             </select>
                         </div>
-                        <div class="flex flex-col gap-1">
-                            <label class="text-[9px] font-black text-slate-500 uppercase">Mês/Ano</label>
-                            <input type="month" id="folha-mes" class="p-3 bg-slate-800 border border-slate-700 rounded-xl text-xs font-bold text-white outline-none">
+                        <div class="flex flex-col gap-2">
+                            <label class="text-[10px] font-black text-slate-500 uppercase tracking-widest">Mês de Referência</label>
+                            <input type="month" id="folha-mes" class="p-4 rounded-2xl font-bold text-sm">
                         </div>
-                        <div class="flex flex-col gap-1">
-                            <label class="text-[9px] font-black text-slate-500 uppercase">Úteis / DSR</label>
+                        <div class="flex flex-col gap-2">
+                            <label class="text-[10px] font-black text-slate-500 uppercase tracking-widest">Cálculo DSR (Úteis / DSR)</label>
                             <div class="flex gap-2">
-                                <input type="number" id="cal-uteis" value="26" class="w-1/2 p-3 bg-slate-800 border border-slate-700 rounded-xl text-xs font-bold text-white text-center">
-                                <input type="number" id="cal-dsr" value="5" class="w-1/2 p-3 bg-slate-800 border border-slate-700 rounded-xl text-xs font-bold text-white text-center">
+                                <input type="number" id="cal-uteis" value="26" class="w-full p-4 rounded-2xl font-bold text-center">
+                                <input type="number" id="cal-dsr" value="4" class="w-full p-4 rounded-2xl font-bold text-center">
                             </div>
+                        </div>
+                        <div class="bg-blue-600/10 border border-blue-500/20 p-4 rounded-2xl">
+                            <p class="text-[9px] font-black text-blue-500 uppercase">Salário Mínimo</p>
+                            <p class="text-xl font-black">R$ 1.518,00</p>
                         </div>
                     </div>
                 </div>
 
-                <div class="card-dark rounded-3xl overflow-hidden">
-                    <table class="w-full text-left text-[11px]">
-                        <thead class="bg-slate-800/50 text-slate-500 font-black uppercase border-b border-slate-700">
-                            <tr>
-                                <th class="p-4">Nome / Regime</th>
-                                <th class="p-4">H. Extras (H:M)</th>
-                                <th class="p-4">Faltas (H:M)</th>
-                                <th class="p-4">Adicional R$</th>
-                                <th class="p-4">Desconto R$</th>
-                                <th class="p-4 text-center">Ações</th>
-                            </tr>
-                        </thead>
-                        <tbody id="tabela-lancamento" class="divide-y divide-slate-800"></tbody>
-                    </table>
+                <div class="card-pro overflow-hidden">
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="bg-slate-800/50 text-slate-400 text-[10px] font-black uppercase tracking-widest">
+                                    <th class="p-6">Colaborador / Base</th>
+                                    <th class="p-6">H. Extras (H:M)</th>
+                                    <th class="p-6">Faltas (H:M)</th>
+                                    <th class="p-6">Bônus R$</th>
+                                    <th class="p-6">Desc. R$</th>
+                                    <th class="p-6 text-right">Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tabela-lancamento" class="divide-y divide-slate-800">
+                                <!-- Linhas via JS -->
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </section>
 
             <!-- ABA: FÉRIAS -->
             <section id="tab-ferias" class="tab-content">
-                <div class="flex justify-between items-center mb-6">
-                    <h2 class="text-2xl font-black uppercase italic tracking-tighter">Controle de Férias</h2>
+                <div class="flex justify-between items-end mb-8">
+                    <div>
+                        <h2 class="text-4xl font-black uppercase italic tracking-tighter text-yellow-500">Gestão de Férias</h2>
+                        <p class="text-slate-500 font-bold text-xs uppercase tracking-widest mt-1">Controle de períodos aquisitivos e gozo</p>
+                    </div>
                 </div>
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="lista-ferias-cards"></div>
+                <div id="lista-ferias-cards" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
             </section>
 
             <!-- ABA: HISTÓRICO -->
             <section id="tab-hist" class="tab-content">
-                <div class="flex justify-between items-center mb-6">
-                    <h2 class="text-2xl font-black uppercase italic tracking-tighter">Arquivo de Recibos</h2>
-                    <div class="flex items-center gap-4">
-                        <input type="month" id="filtro-hist-mes" onchange="renderHistorico()" class="p-2 bg-slate-800 border border-slate-700 rounded-xl text-xs font-bold text-white">
-                        <button onclick="imprimirTudo()" class="bg-blue-600 text-white px-4 py-2 rounded-xl font-bold text-[10px] uppercase">Imprimir Tudo</button>
+                <div class="flex flex-col md:flex-row justify-between items-center gap-4 mb-8">
+                    <h2 class="text-4xl font-black uppercase italic tracking-tighter">Arquivo Digital</h2>
+                    <div class="flex items-center gap-4 w-full md:w-auto">
+                        <input type="month" id="filtro-hist-mes" onchange="renderHistorico()" class="flex-grow p-4 rounded-2xl font-bold text-sm">
+                        <button onclick="imprimirTudo()" class="bg-blue-600 text-white px-6 py-4 rounded-2xl font-black text-xs uppercase whitespace-nowrap">Imprimir Lote</button>
                     </div>
                 </div>
-                <div id="lista-historico" class="space-y-3"></div>
+                <div id="lista-historico" class="space-y-4"></div>
             </section>
 
             <!-- ABA: CONFIG -->
             <section id="tab-config" class="tab-content">
-                <div class="max-w-xl mx-auto card-dark rounded-3xl p-8">
-                    <h2 class="text-xl font-black uppercase mb-6">Dados da Empresa</h2>
-                    <form id="form-empresa" class="space-y-4">
-                        <input type="text" id="emp-nome" placeholder="Nome da Empresa" class="w-full p-4 bg-slate-800 border border-slate-700 rounded-2xl font-bold text-white outline-none">
-                        <input type="text" id="emp-cnpj" placeholder="CNPJ" class="w-full p-4 bg-slate-800 border border-slate-700 rounded-2xl font-bold text-white outline-none">
-                        <button type="submit" class="w-full bg-blue-600 text-white p-4 rounded-2xl font-black uppercase shadow-lg shadow-blue-500/20">Salvar Ajustes</button>
+                <div class="max-w-2xl mx-auto card-pro p-10">
+                    <h2 class="text-2xl font-black uppercase mb-8 border-b border-slate-800 pb-4 italic">Configurações da Empresa</h2>
+                    <form id="form-empresa" class="space-y-6">
+                        <div class="space-y-2">
+                            <label class="text-[10px] font-black text-slate-500 uppercase">Razão Social</label>
+                            <input type="text" id="emp-nome" class="w-full p-5 rounded-2xl font-bold text-lg">
+                        </div>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div class="space-y-2">
+                                <label class="text-[10px] font-black text-slate-500 uppercase">CNPJ</label>
+                                <input type="text" id="emp-cnpj" placeholder="00.000.000/0001-00" class="w-full p-5 rounded-2xl font-bold">
+                            </div>
+                            <div class="space-y-2">
+                                <label class="text-[10px] font-black text-slate-500 uppercase">Telefone/Contato</label>
+                                <input type="text" id="emp-tel" placeholder="(00) 00000-0000" class="w-full p-5 rounded-2xl font-bold">
+                            </div>
+                        </div>
+                        <button type="submit" class="w-full bg-blue-600 text-white p-5 rounded-2xl font-black uppercase tracking-widest shadow-xl shadow-blue-500/20">Salvar Alterações</button>
                     </form>
                 </div>
             </section>
         </main>
     </div>
 
-    <!-- MODAIS E PREVIEWS (Omitidos aqui por brevidade, mas mantidos no código funcional) -->
-    <!-- [MANTENHA OS MODAIS DO CÓDIGO ANTERIOR AQUI] -->
-
-    <!-- REPETINDO MODAL FUNCIONARIO PARA GARANTIR FUNCIONAMENTO -->
-    <div id="modal-func" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md hidden items-center justify-center p-4 z-50">
-        <div class="bg-slate-900 w-full max-w-lg rounded-3xl p-8 border border-slate-800">
-            <h3 class="text-xl font-black uppercase mb-6" id="titulo-modal-func">Dados do Colaborador</h3>
+    <!-- MODAL: FUNCIONÁRIO -->
+    <div id="modal-func" class="fixed inset-0 bg-slate-950/90 backdrop-blur-xl hidden items-center justify-center p-4 z-50">
+        <div class="bg-slate-900 w-full max-w-xl rounded-[2.5rem] p-10 border border-slate-800 shadow-2xl">
+            <h3 class="text-2xl font-black uppercase mb-8 italic" id="titulo-modal-func">Cadastro de Colaborador</h3>
             <form id="form-cad-func" class="space-y-4">
                 <input type="hidden" id="func-id">
-                <input type="text" id="func-nome" placeholder="Nome Completo" required class="w-full p-3 bg-slate-800 border border-slate-700 rounded-xl font-bold text-white outline-none">
-                <div class="grid grid-cols-2 gap-4">
-                    <input type="text" id="func-cargo" placeholder="Cargo" required class="w-full p-3 bg-slate-800 border border-slate-700 rounded-xl font-bold text-white outline-none">
-                    <select id="func-regime" class="w-full p-3 bg-slate-800 border border-slate-700 rounded-xl font-bold text-white outline-none">
-                        <option value="MENSALISTA">MENSALISTA</option>
-                        <option value="HORISTA">HORISTA</option>
-                    </select>
+                <div class="space-y-1">
+                    <label class="text-[10px] font-black text-slate-500 uppercase">Nome Completo</label>
+                    <input type="text" id="func-nome" required class="w-full p-4 rounded-xl font-bold">
                 </div>
                 <div class="grid grid-cols-2 gap-4">
-                    <div class="flex flex-col gap-1">
-                        <label class="text-[9px] font-black text-slate-500 uppercase">Salário ou Valor Hora</label>
-                        <input type="number" id="func-salario" step="0.01" required class="w-full p-3 bg-slate-800 border border-slate-700 rounded-xl font-bold text-white outline-none">
+                    <div class="space-y-1">
+                        <label class="text-[10px] font-black text-slate-500 uppercase">Cargo / Função</label>
+                        <input type="text" id="func-cargo" required class="w-full p-4 rounded-xl font-bold">
                     </div>
-                    <div class="flex flex-col gap-1">
-                        <label class="text-[9px] font-black text-slate-500 uppercase">Admissão</label>
-                        <input type="date" id="func-admissao" required class="w-full p-3 bg-slate-800 border border-slate-700 rounded-xl font-bold text-white outline-none">
+                    <div class="space-y-1">
+                        <label class="text-[10px] font-black text-slate-500 uppercase">Regime</label>
+                        <select id="func-regime" class="w-full p-4 rounded-xl font-bold">
+                            <option value="MENSALISTA">MENSALISTA</option>
+                            <option value="HORISTA">HORISTA</option>
+                        </select>
                     </div>
                 </div>
-                <div class="flex gap-4 pt-4">
-                    <button type="button" onclick="fecharModalFunc()" class="flex-1 p-3 bg-slate-800 text-slate-400 rounded-xl font-black uppercase text-xs">Cancelar</button>
-                    <button type="submit" class="flex-1 p-3 bg-blue-600 text-white rounded-xl font-black uppercase text-xs">Salvar</button>
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="space-y-1">
+                        <label class="text-[10px] font-black text-slate-500 uppercase">Salário ou Valor Hora</label>
+                        <input type="number" id="func-salario" step="0.01" required class="w-full p-4 rounded-xl font-bold">
+                    </div>
+                    <div class="space-y-1">
+                        <label class="text-[10px] font-black text-slate-500 uppercase">Data Admissão</label>
+                        <input type="date" id="func-admissao" required class="w-full p-4 rounded-xl font-bold">
+                    </div>
+                </div>
+                <div class="flex gap-4 pt-6">
+                    <button type="button" onclick="fecharModalFunc()" class="flex-1 p-5 bg-slate-800 text-slate-400 rounded-2xl font-black uppercase text-xs">Cancelar</button>
+                    <button type="submit" class="flex-1 p-5 bg-blue-600 text-white rounded-2xl font-black uppercase text-xs shadow-lg shadow-blue-500/20">Gravar Dados</button>
                 </div>
             </form>
         </div>
     </div>
 
-    <!-- MODAL FÉRIAS -->
-    <div id="modal-ferias" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md hidden items-center justify-center p-4 z-50">
-         <div class="bg-slate-900 w-full max-w-lg rounded-3xl p-8 border border-slate-800">
-            <h3 class="text-xl font-black uppercase mb-6">Lançar Férias</h3>
-            <form id="form-lancar-ferias" class="space-y-4">
+    <!-- MODAL: FÉRIAS -->
+    <div id="modal-ferias" class="fixed inset-0 bg-slate-950/90 backdrop-blur-xl hidden items-center justify-center p-4 z-50">
+        <div class="bg-slate-900 w-full max-w-lg rounded-[2.5rem] p-10 border border-slate-800 shadow-2xl text-center">
+            <h3 class="text-2xl font-black uppercase mb-2 italic">Lançamento de Férias</h3>
+            <p id="ferias-nome-display" class="text-blue-500 font-bold mb-8 uppercase text-sm"></p>
+            <form id="form-lancar-ferias" class="space-y-4 text-left">
                 <input type="hidden" id="ferias-func-id">
-                <p id="ferias-nome-display" class="text-blue-500 font-bold mb-4"></p>
                 <div class="grid grid-cols-2 gap-4">
-                    <input type="date" id="fer-data-inicio" required class="p-3 bg-slate-800 border border-slate-700 rounded-xl text-white outline-none">
-                    <input type="number" id="fer-dias-gozo" placeholder="Dias Gozo" required class="p-3 bg-slate-800 border border-slate-700 rounded-xl text-white outline-none">
+                    <div class="space-y-1">
+                        <label class="text-[10px] font-black text-slate-500 uppercase">Início do Gozo</label>
+                        <input type="date" id="fer-data-inicio" required class="w-full p-4 rounded-xl font-bold">
+                    </div>
+                    <div class="space-y-1">
+                        <label class="text-[10px] font-black text-slate-500 uppercase">Dias de Gozo</label>
+                        <input type="number" id="fer-dias-gozo" value="30" required class="w-full p-4 rounded-xl font-bold">
+                    </div>
                 </div>
                 <div class="grid grid-cols-2 gap-4">
-                    <input type="number" id="fer-media-horas" step="0.01" placeholder="Média Horas" class="p-3 bg-slate-800 border border-slate-700 rounded-xl text-white outline-none">
-                    <input type="number" id="fer-media-percent" value="50" placeholder="% HE" class="p-3 bg-slate-800 border border-slate-700 rounded-xl text-white outline-none">
+                    <div class="space-y-1">
+                        <label class="text-[10px] font-black text-slate-500 uppercase">Média de Horas (Valor R$)</label>
+                        <input type="number" id="fer-media-horas" value="0" step="0.01" class="w-full p-4 rounded-xl font-bold">
+                    </div>
+                    <div class="space-y-1">
+                        <label class="text-[10px] font-black text-slate-500 uppercase">Abono Pecuniário (Dias)</label>
+                        <input type="number" id="fer-abono" value="0" class="w-full p-4 rounded-xl font-bold">
+                    </div>
                 </div>
-                <button type="submit" class="w-full p-3 bg-yellow-600 text-white rounded-xl font-black uppercase text-xs">Processar</button>
-                <button type="button" onclick="fecharModalFerias()" class="w-full p-2 text-slate-500 text-xs">Fechar</button>
+                <button type="submit" class="w-full p-5 bg-yellow-600 text-white rounded-2xl font-black uppercase text-xs shadow-xl shadow-yellow-500/10 mt-6">Processar Recibo de Férias</button>
+                <button type="button" onclick="fecharModalFerias()" class="w-full text-slate-600 text-[10px] font-black uppercase mt-4">Fechar sem salvar</button>
             </form>
-         </div>
+        </div>
+    </div>
+
+    <!-- PREVIEW DE HOLERITE (MODAL) -->
+    <div id="holerite-preview-container" class="fixed inset-0 bg-black/95 z-[300] hidden overflow-y-auto p-4 md:p-10">
+        <div class="max-w-4xl mx-auto">
+            <div class="flex justify-between items-center mb-6 no-print">
+                <h3 class="text-xl font-black uppercase italic">Visualização do Recibo</h3>
+                <div class="flex gap-4">
+                    <button onclick="window.print()" class="bg-green-600 text-white px-6 py-2 rounded-xl font-black text-xs uppercase">Imprimir</button>
+                    <button onclick="fecharPreview()" class="bg-slate-800 text-white px-6 py-2 rounded-xl font-black text-xs uppercase">Fechar</button>
+                </div>
+            </div>
+            <div id="holerite-print-area" class="bg-white text-black p-8 rounded-lg">
+                <!-- Conteúdo gerado via JS -->
+            </div>
+        </div>
     </div>
 
     <script>
-        // --- BASE DE DADOS ---
+        // --- BASE DE DADOS E ESTADO ---
         let db = {
-            empresa: JSON.parse(localStorage.getItem('dva_emp')) || { nome: 'NOME DA EMPRESA LTDA', cnpj: '00.000.000/0001-00' },
-            funcionarios: JSON.parse(localStorage.getItem('dva_func')) || [],
-            historico: JSON.parse(localStorage.getItem('dva_hist')) || [],
-            ferias_gozadas: JSON.parse(localStorage.getItem('dva_ferias')) || []
+            empresa: JSON.parse(localStorage.getItem('dvapro_emp')) || { nome: 'NOME DA EMPRESA LTDA', cnpj: '00.000.000/0001-00', tel: '(00) 0000-0000' },
+            funcionarios: JSON.parse(localStorage.getItem('dvapro_func')) || [],
+            historico: JSON.parse(localStorage.getItem('dvapro_hist')) || []
         };
 
+        const SALARIO_MINIMO = 1518.00;
+
         function salvarDB() {
-            localStorage.setItem('dva_emp', JSON.stringify(db.empresa));
-            localStorage.setItem('dva_func', JSON.stringify(db.funcionarios));
-            localStorage.setItem('dva_hist', JSON.stringify(db.historico));
-            localStorage.setItem('dva_ferias', JSON.stringify(db.ferias_gozadas));
+            localStorage.setItem('dvapro_emp', JSON.stringify(db.empresa));
+            localStorage.setItem('dvapro_func', JSON.stringify(db.funcionarios));
+            localStorage.setItem('dvapro_hist', JSON.stringify(db.historico));
         }
 
         // --- NAVEGAÇÃO ---
         function showTab(tabId) {
             document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
-            document.getElementById(tabId).classList.add('active');
+            document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('bg-blue-600', 'text-white'));
             
-            // Re-renderizar dados específicos da aba ao abrir
+            const activeTab = document.getElementById(tabId);
+            if(activeTab) {
+                activeTab.classList.add('active');
+                // Adiciona destaque ao link ativo
+                const link = Array.from(document.querySelectorAll('.nav-link')).find(btn => btn.getAttribute('onclick')?.includes(tabId));
+                if(link) link.classList.add('bg-blue-600', 'text-white');
+            }
+
             if(tabId === 'tab-func') renderFuncionarios();
             if(tabId === 'tab-folha') renderTabelaFolha();
             if(tabId === 'tab-ferias') renderFerias();
@@ -254,52 +324,58 @@
 
         // --- INICIALIZAÇÃO ---
         function init() {
+            document.getElementById('loader').style.opacity = '0';
+            setTimeout(() => document.getElementById('loader').style.display = 'none', 500);
+
             document.getElementById('topEmpresaNome').innerText = db.empresa.nome;
             document.getElementById('emp-nome').value = db.empresa.nome;
             document.getElementById('emp-cnpj').value = db.empresa.cnpj;
-            
+            document.getElementById('emp-tel').value = db.empresa.tel || "";
+
             const now = new Date();
             const monthStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
             document.getElementById('folha-mes').value = monthStr;
             document.getElementById('filtro-hist-mes').value = monthStr;
-            
+
             renderFuncionarios();
             renderTabelaFolha();
-            renderHistorico();
-            renderFerias();
         }
 
-        // --- RENDERIZAÇÃO DE FUNCIONÁRIOS ---
+        // --- GESTÃO DE EQUIPE ---
         function renderFuncionarios() {
             const list = document.getElementById('lista-funcionarios');
-            if (db.funcionarios.length === 0) {
-                list.innerHTML = `<div class="col-span-full p-10 text-center text-slate-500 italic">Nenhum funcionário cadastrado.</div>`;
+            if(db.funcionarios.length === 0) {
+                list.innerHTML = `<div class="col-span-full py-20 text-center text-slate-600 font-bold uppercase tracking-widest text-xs border-2 border-dashed border-slate-800 rounded-[2rem]">Nenhum colaborador registrado no sistema.</div>`;
                 return;
             }
             list.innerHTML = db.funcionarios.map(f => `
-                <div class="card-dark p-6 rounded-3xl group">
-                    <div class="flex justify-between items-start mb-2">
-                        <span class="text-[8px] font-black text-blue-500 uppercase tracking-widest">${f.regime}</span>
-                        <span class="text-[8px] font-bold text-slate-500 uppercase">${f.admissao.split('-').reverse().join('/')}</span>
+                <div class="card-pro p-8 group hover:border-blue-500/50 transition-all">
+                    <div class="flex justify-between items-start mb-6">
+                        <span class="bg-blue-600/10 text-blue-500 text-[9px] font-black px-3 py-1 rounded-full uppercase tracking-widest">${f.regime}</span>
+                        <span class="text-[9px] font-black text-slate-500 uppercase">ADM: ${f.admissao.split('-').reverse().join('/')}</span>
                     </div>
-                    <h3 class="text-sm font-black text-white uppercase truncate">${f.nome}</h3>
-                    <p class="text-[10px] text-slate-500 uppercase italic mb-4">${f.cargo}</p>
-                    <div class="flex gap-3 pt-4 border-t border-slate-700">
-                        <button onclick="editarFunc('${f.id}')" class="text-[9px] text-blue-400 font-black uppercase">Editar</button>
-                        <button onclick="deletarFunc('${f.id}')" class="text-[9px] text-red-500 font-black uppercase">Excluir</button>
+                    <h3 class="text-xl font-black text-white uppercase mb-1 truncate">${f.nome}</h3>
+                    <p class="text-[10px] text-slate-500 font-bold uppercase italic mb-6">${f.cargo}</p>
+                    <div class="flex items-center justify-between pt-6 border-t border-slate-800">
+                        <div class="text-[10px] font-black uppercase text-slate-400">Salário Base</div>
+                        <div class="text-sm font-black text-blue-500">R$ ${parseFloat(f.salario).toLocaleString('pt-BR', {minimumFractionDigits: 2})}</div>
+                    </div>
+                    <div class="flex gap-2 mt-6 opacity-0 group-hover:opacity-100 transition-all">
+                        <button onclick="editarFunc('${f.id}')" class="flex-1 bg-slate-800 hover:bg-slate-700 text-[9px] font-black uppercase py-2 rounded-lg">Editar</button>
+                        <button onclick="removerFunc('${f.id}')" class="flex-1 bg-red-500/10 hover:bg-red-500 text-red-500 hover:text-white text-[9px] font-black uppercase py-2 rounded-lg transition">Excluir</button>
                     </div>
                 </div>
             `).join('');
         }
 
-        // --- MODAL FUNCIONÁRIO ---
-        function abrirModalFunc() { 
-            document.getElementById('form-cad-func').reset(); 
-            document.getElementById('func-id').value = ""; 
-            document.getElementById('titulo-modal-func').innerText = "Novo Funcionário";
-            document.getElementById('modal-func').style.display = 'flex'; 
+        function abrirModalFunc() {
+            document.getElementById('form-cad-func').reset();
+            document.getElementById('func-id').value = "";
+            document.getElementById('titulo-modal-func').innerText = "Cadastro de Colaborador";
+            document.getElementById('modal-func').classList.replace('hidden', 'flex');
         }
-        function fecharModalFunc() { document.getElementById('modal-func').style.display = 'none'; }
+
+        function fecharModalFunc() { document.getElementById('modal-func').classList.replace('flex', 'hidden'); }
 
         document.getElementById('form-cad-func').onsubmit = (e) => {
             e.preventDefault();
@@ -312,70 +388,335 @@
                 salario: parseFloat(document.getElementById('func-salario').value),
                 admissao: document.getElementById('func-admissao').value
             };
+            
             db.funcionarios = db.funcionarios.filter(f => f.id !== id);
             db.funcionarios.push(novo);
-            salvarDB(); 
-            fecharModalFunc(); 
-            renderFuncionarios(); 
-            renderTabelaFolha(); // Atualiza folha de lançamento
+            salvarDB();
+            fecharModalFunc();
+            renderFuncionarios();
+            renderTabelaFolha();
         };
 
-        // --- OUTRAS FUNÇÕES ---
+        function editarFunc(id) {
+            const f = db.funcionarios.find(x => x.id === id);
+            if(!f) return;
+            document.getElementById('func-id').value = f.id;
+            document.getElementById('func-nome').value = f.nome;
+            document.getElementById('func-cargo').value = f.cargo;
+            document.getElementById('func-regime').value = f.regime;
+            document.getElementById('func-salario').value = f.salario;
+            document.getElementById('func-admissao').value = f.admissao;
+            document.getElementById('titulo-modal-func').innerText = "Editar Colaborador";
+            document.getElementById('modal-func').classList.replace('hidden', 'flex');
+        }
+
+        function removerFunc(id) {
+            if(confirm("Deseja realmente excluir este colaborador? Históricos não serão apagados.")) {
+                db.funcionarios = db.funcionarios.filter(f => f.id !== id);
+                salvarDB();
+                renderFuncionarios();
+            }
+        }
+
+        // --- CÁLCULOS E LANÇAMENTOS ---
+        function timeToDec(t) {
+            if(!t) return 0;
+            const [h, m] = t.split(':').map(Number);
+            return h + (m / 60);
+        }
+
+        function calcINSS(base) {
+            if (base <= 1518) return base * 0.075;
+            if (base <= 2793.88) return (base - 1518) * 0.09 + 113.85;
+            if (base <= 4190.83) return (base - 2793.88) * 0.12 + 228.68;
+            if (base <= 8157.41) return (base - 4190.83) * 0.14 + 396.31;
+            return 951.63;
+        }
+
         function renderTabelaFolha() {
             const list = document.getElementById('tabela-lancamento');
             list.innerHTML = db.funcionarios.map(f => `
-                <tr class="hover:bg-slate-800/30">
-                    <td class="p-4 text-white font-bold text-[10px]">${f.nome}</td>
-                    <td class="p-4"><input type="time" id="hex-${f.id}" class="bg-slate-800 border rounded p-1 w-16"></td>
-                    <td class="p-4"><input type="time" id="hfa-${f.id}" class="bg-slate-800 border rounded p-1 w-16"></td>
-                    <td class="p-4"><input type="number" id="add-${f.id}" class="bg-slate-800 border rounded p-1 w-16"></td>
-                    <td class="p-4"><input type="number" id="dec-${f.id}" class="bg-slate-800 border rounded p-1 w-16"></td>
-                    <td class="p-4"><button onclick="processar('${f.id}')" class="bg-blue-600 px-2 py-1 rounded text-[10px]">GRAVAR</button></td>
+                <tr class="hover:bg-slate-800/20 transition-all">
+                    <td class="p-6">
+                        <div class="text-sm font-black text-white uppercase">${f.nome}</div>
+                        <div class="text-[9px] text-slate-500 font-bold">BASE: R$ ${f.salario.toLocaleString('pt-BR')}</div>
+                    </td>
+                    <td class="p-6"><input type="time" id="hex-${f.id}" class="p-2 rounded-lg text-xs w-20 text-center"></td>
+                    <td class="p-6"><input type="time" id="hfa-${f.id}" class="p-2 rounded-lg text-xs w-20 text-center"></td>
+                    <td class="p-6"><input type="number" id="add-${f.id}" placeholder="0.00" class="p-2 rounded-lg text-xs w-24"></td>
+                    <td class="p-6"><input type="number" id="dec-${f.id}" placeholder="0.00" class="p-2 rounded-lg text-xs w-24"></td>
+                    <td class="p-6 text-right">
+                        <button onclick="processarMensal('${f.id}')" class="bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded-xl text-[10px] font-black uppercase transition-all">Gravar</button>
+                    </td>
                 </tr>
             `).join('');
         }
 
-        function renderFerias() {
-            const list = document.getElementById('lista-ferias-cards');
-            list.innerHTML = db.funcionarios.map(f => `
-                <div class="card-dark p-6 rounded-3xl">
-                    <h3 class="text-white font-black uppercase text-xs">${f.nome}</h3>
-                    <button onclick="abrirModalFerias('${f.id}')" class="mt-4 w-full bg-yellow-600 p-2 rounded-xl text-[10px] font-black uppercase">Lançar Férias</button>
+        function processarMensal(id) {
+            const f = db.funcionarios.find(x => x.id === id);
+            const mes = document.getElementById('folha-mes').value;
+            const tipo = document.getElementById('folha-tipo').value;
+            const du = parseInt(document.getElementById('cal-uteis').value);
+            const dsrD = parseInt(document.getElementById('cal-dsr').value);
+            
+            if(!mes) return alert("Selecione o mês de referência.");
+
+            const hexH = timeToDec(document.getElementById(`hex-${id}`).value);
+            const hfaH = timeToDec(document.getElementById(`hfa-${id}`).value);
+            const vAdd = parseFloat(document.getElementById(`add-${id}`).value) || 0;
+            const vDec = parseFloat(document.getElementById(`dec-${id}`).value) || 0;
+
+            const valHora = f.salario / 220;
+            const insalubridade = SALARIO_MINIMO * 0.20;
+            const vExtra = hexH * valHora * 1.5;
+            const vDsr = (vExtra / du) * dsrD;
+            const vFalta = hfaH * valHora;
+            
+            const bruto = f.salario + vExtra + vDsr + insalubridade + vAdd - vFalta - vDec;
+            const inss = calcINSS(bruto);
+            const liq = bruto - inss;
+
+            const recibo = {
+                id: Date.now(),
+                funcId: f.id,
+                nome: f.nome,
+                cargo: f.cargo,
+                mes,
+                tipo,
+                admissao: f.admissao,
+                base: f.salario,
+                verbas: [
+                    { desc: 'SALÁRIO BASE', ref: '30D', prov: f.salario, desc: 0 },
+                    { desc: 'INSALUBRIDADE', ref: '20%', prov: insalubridade, desc: 0 },
+                    { desc: 'HORAS EXTRAS 50%', ref: hexH.toFixed(2), prov: vExtra, desc: 0 },
+                    { desc: 'DSR S/ EXTRAS', ref: dsrD, prov: vDsr, desc: 0 },
+                    { desc: 'ADICIONAIS/BÔNUS', ref: '-', prov: vAdd, desc: 0 },
+                    { desc: 'FALTAS/ATRASOS', ref: hfaH.toFixed(2), prov: 0, desc: vFalta },
+                    { desc: 'OUTROS DESCONTOS', ref: '-', prov: 0, desc: vDec },
+                    { desc: 'INSS', ref: 'TABELA', prov: 0, desc: inss }
+                ],
+                totalProv: f.salario + insalubridade + vExtra + vDsr + vAdd,
+                totalDesc: vFalta + vDec + inss,
+                liquido: liq
+            };
+
+            db.historico = db.historico.filter(h => !(h.funcId === id && h.mes === mes && h.tipo === tipo));
+            db.historico.push(recibo);
+            salvarDB();
+            alert(`Folha de ${f.nome} processada com sucesso!`);
+        }
+
+        // --- ARQUIVO E HISTÓRICO ---
+        function renderHistorico() {
+            const mes = document.getElementById('filtro-hist-mes').value;
+            const container = document.getElementById('lista-historico');
+            let filtrados = db.historico.filter(h => h.mes === mes);
+            
+            if(filtrados.length === 0) {
+                container.innerHTML = `<div class="p-20 text-center text-slate-600 font-bold uppercase text-[10px]">Nenhum recibo encontrado para este período.</div>`;
+                return;
+            }
+
+            container.innerHTML = filtrados.map(h => `
+                <div class="card-pro p-6 flex justify-between items-center group">
+                    <div class="flex items-center gap-6">
+                        <div class="bg-blue-600/10 p-4 rounded-2xl text-blue-500 font-black text-xs uppercase">
+                            ${h.tipo.split(' ')[0]}
+                        </div>
+                        <div>
+                            <h4 class="text-sm font-black text-white uppercase">${h.nome}</h4>
+                            <p class="text-[10px] text-slate-500 font-bold uppercase">${h.cargo}</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-8">
+                        <div class="text-right">
+                            <p class="text-[9px] font-black text-slate-500 uppercase">Valor Líquido</p>
+                            <p class="text-lg font-black text-green-500">R$ ${h.liquido.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</p>
+                        </div>
+                        <button onclick="visualizarHolerite('${h.id}')" class="bg-slate-800 p-3 rounded-xl hover:bg-blue-600 transition-all">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                        </button>
+                    </div>
                 </div>
             `).join('');
+        }
+
+        function visualizarHolerite(id) {
+            const h = db.historico.find(x => x.id == id);
+            if(!h) return;
+
+            const area = document.getElementById('holerite-print-area');
+            area.innerHTML = `
+                <div class="holerite-page border-2 border-black p-6">
+                    <div class="flex justify-between border-b-2 border-black pb-4 mb-4">
+                        <div>
+                            <h2 class="font-black text-lg uppercase">${db.empresa.nome}</h2>
+                            <p class="text-[10px]">CNPJ: ${db.empresa.cnpj}</p>
+                        </div>
+                        <div class="text-right">
+                            <h3 class="font-black uppercase text-sm">Recibo de Pagamento</h3>
+                            <p class="text-[10px] font-bold">REFERÊNCIA: ${h.mes.split('-').reverse().join('/')}</p>
+                        </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-2 gap-4 mb-4 text-[11px]">
+                        <div><b>NOME:</b> ${h.nome}</div>
+                        <div><b>CARGO:</b> ${h.cargo}</div>
+                        <div><b>ADMISSÃO:</b> ${h.admissao.split('-').reverse().join('/')}</div>
+                        <div><b>TIPO:</b> ${h.tipo}</div>
+                    </div>
+
+                    <table class="w-full text-left border-collapse border border-black mb-6">
+                        <thead>
+                            <tr class="bg-gray-100 border-b border-black">
+                                <th class="p-2 border-r border-black">DESCRIÇÃO</th>
+                                <th class="p-2 border-r border-black">REF</th>
+                                <th class="p-2 border-r border-black">PROVENTOS</th>
+                                <th class="p-2">DESCONTOS</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${h.verbas.filter(v => (v.prov > 0 || v.desc > 0)).map(v => `
+                                <tr class="border-b border-black">
+                                    <td class="p-2 border-r border-black">${v.desc}</td>
+                                    <td class="p-2 border-r border-black text-center">${v.ref}</td>
+                                    <td class="p-2 border-r border-black text-right">${v.prov > 0 ? v.prov.toLocaleString('pt-BR', {minimumFractionDigits: 2}) : ''}</td>
+                                    <td class="p-2 text-right">${v.desc > 0 ? v.desc.toLocaleString('pt-BR', {minimumFractionDigits: 2}) : ''}</td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+
+                    <div class="grid grid-cols-3 gap-0 border-2 border-black font-bold text-center">
+                        <div class="p-2 border-r border-black">TOTAL PROVENTOS<br>R$ ${h.totalProv.toLocaleString('pt-BR', {minimumFractionDigits:2})}</div>
+                        <div class="p-2 border-r border-black">TOTAL DESCONTOS<br>R$ ${h.totalDesc.toLocaleString('pt-BR', {minimumFractionDigits:2})}</div>
+                        <div class="p-2 bg-gray-200">VALOR LÍQUIDO<br>R$ ${h.liquido.toLocaleString('pt-BR', {minimumFractionDigits:2})}</div>
+                    </div>
+
+                    <div class="mt-20 flex justify-between gap-10">
+                        <div class="flex-1 border-t border-black text-center pt-2 text-[10px] uppercase">Assinatura do Colaborador</div>
+                        <div class="flex-1 border-t border-black text-center pt-2 text-[10px] uppercase">Data do Recebimento</div>
+                    </div>
+                </div>
+            `;
+
+            document.getElementById('holerite-preview-container').classList.remove('hidden');
+        }
+
+        function fecharPreview() { document.getElementById('holerite-preview-container').classList.add('hidden'); }
+
+        // --- GESTÃO DE FÉRIAS ---
+        function renderFerias() {
+            const list = document.getElementById('lista-ferias-cards');
+            list.innerHTML = db.funcionarios.map(f => {
+                const adm = new Date(f.admissao);
+                const hoje = new Date();
+                const diffMeses = (hoje.getFullYear() - adm.getFullYear()) * 12 + (hoje.getMonth() - adm.getMonth());
+                const vencido = diffMeses >= 12;
+
+                return `
+                <div class="card-pro p-8 border-l-4 ${vencido ? 'border-yellow-500' : 'border-blue-600'}">
+                    <h3 class="text-white font-black uppercase text-sm mb-1">${f.nome}</h3>
+                    <p class="text-[10px] text-slate-500 font-bold uppercase mb-4 italic">${f.cargo}</p>
+                    <div class="bg-slate-800/50 p-4 rounded-xl mb-6">
+                        <div class="flex justify-between text-[10px] mb-1"><span class="text-slate-500 uppercase font-black">Tempo de Casa</span><span class="text-white">${Math.floor(diffMeses/12)}A ${diffMeses%12}M</span></div>
+                        <div class="flex justify-between text-[10px]"><span class="text-slate-500 uppercase font-black">Status</span><span class="${vencido ? 'text-yellow-500' : 'text-blue-500'} font-black">${vencido ? 'PERÍODO CONQUISTADO' : 'EM AQUISIÇÃO'}</span></div>
+                    </div>
+                    <button onclick="abrirModalFerias('${f.id}')" class="w-full bg-yellow-600 hover:bg-yellow-500 text-white p-4 rounded-2xl text-[10px] font-black uppercase shadow-xl shadow-yellow-500/10 transition-all">Lançar Recibo de Férias</button>
+                </div>
+                `;
+            }).join('');
         }
 
         function abrirModalFerias(id) {
             const f = db.funcionarios.find(x => x.id === id);
             document.getElementById('ferias-func-id').value = id;
             document.getElementById('ferias-nome-display').innerText = f.nome;
-            document.getElementById('modal-ferias').style.display = 'flex';
+            document.getElementById('modal-ferias').classList.replace('hidden', 'flex');
         }
 
-        function fecharModalFerias() { document.getElementById('modal-ferias').style.display = 'none'; }
+        function fecharModalFerias() { document.getElementById('modal-ferias').classList.replace('flex', 'hidden'); }
 
-        // --- LOGIN E LOGOUT ---
+        document.getElementById('form-lancar-ferias').onsubmit = (e) => {
+            e.preventDefault();
+            const id = document.getElementById('ferias-func-id').value;
+            const f = db.funcionarios.find(x => x.id === id);
+            const dataI = document.getElementById('fer-data-inicio').value;
+            const diasG = parseInt(document.getElementById('fer-dias-gozo').value);
+            const mediaH = parseFloat(document.getElementById('fer-media-horas').value) || 0;
+            const abonoD = parseInt(document.getElementById('fer-abono').value) || 0;
+
+            const baseFerias = f.salario + mediaH;
+            const valorFeriasGozo = (baseFerias / 30) * diasG;
+            const umTerco = valorFeriasGozo / 3;
+            const vAbono = (baseFerias / 30) * abonoD;
+            const tercoAbono = vAbono / 3;
+
+            const bruto = valorFeriasGozo + umTerco + vAbono + tercoAbono;
+            const inss = calcINSS(bruto);
+
+            const recibo = {
+                id: Date.now(),
+                funcId: f.id,
+                nome: f.nome,
+                cargo: f.cargo,
+                mes: dataI.substring(0, 7),
+                tipo: 'RECIBO DE FÉRIAS',
+                admissao: f.admissao,
+                base: baseFerias,
+                verbas: [
+                    { desc: `FÉRIAS GOZADAS (${diasG} DIAS)`, ref: diasG, prov: valorFeriasGozo, desc: 0 },
+                    { desc: '1/3 CONSTITUCIONAL FÉRIAS', ref: '33.3%', prov: umTerco, desc: 0 },
+                    { desc: 'ABONO PECUNIÁRIO', ref: abonoD, prov: vAbono, desc: 0 },
+                    { desc: '1/3 SOBRE ABONO', ref: '33.3%', prov: tercoAbono, desc: 0 },
+                    { desc: 'INSS S/ FÉRIAS', ref: 'TABELA', prov: 0, desc: inss }
+                ],
+                totalProv: bruto,
+                totalDesc: inss,
+                liquido: bruto - inss
+            };
+
+            db.historico.push(recibo);
+            salvarDB();
+            fecharModalFerias();
+            alert("Recibo de férias gerado e arquivado!");
+        };
+
+        // --- AUTH E CONFIG ---
         document.getElementById('form-login').onsubmit = (e) => {
             e.preventDefault();
-            sessionStorage.setItem('dva_auth', 'true');
+            sessionStorage.setItem('dvapro_auth', 'true');
             document.getElementById('auth-container').classList.add('hidden');
             document.getElementById('main-app').classList.remove('hidden');
             init();
         };
 
         function logout() {
-            sessionStorage.removeItem('dva_auth');
+            sessionStorage.removeItem('dvapro_auth');
             window.location.reload();
         }
 
-        // Executar no carregamento
+        document.getElementById('form-empresa').onsubmit = (e) => {
+            e.preventDefault();
+            db.empresa.nome = document.getElementById('emp-nome').value.toUpperCase();
+            db.empresa.cnpj = document.getElementById('emp-cnpj').value;
+            db.empresa.tel = document.getElementById('emp-tel').value;
+            salvarDB();
+            document.getElementById('topEmpresaNome').innerText = db.empresa.nome;
+            alert("Dados da empresa atualizados!");
+        };
+
         window.onload = () => {
-            if(sessionStorage.getItem('dva_auth') === 'true') {
+            if(sessionStorage.getItem('dvapro_auth') === 'true') {
                 document.getElementById('auth-container').classList.add('hidden');
                 document.getElementById('main-app').classList.remove('hidden');
                 init();
             }
         };
+
+        function imprimirTudo() {
+            window.print();
+        }
     </script>
 </body>
 </html>
