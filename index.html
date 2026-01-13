@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DVA-PRO | Gestão de Folha</title>
+    <title>DVA-PRO | Gestão de Folha e Férias</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;900&display=swap');
@@ -69,9 +69,10 @@
                 </div>
                 <nav class="flex gap-4">
                     <button onclick="showTab('tab-func')" class="text-[10px] font-black uppercase hover:text-blue-500 transition">Equipe</button>
-                    <button onclick="showTab('tab-folha')" class="text-[10px] font-black uppercase hover:text-blue-500 transition">Lançar Folha</button>
-                    <button onclick="showTab('tab-hist')" class="text-[10px] font-black uppercase hover:text-blue-500 transition">Holerites</button>
-                    <button onclick="showTab('tab-config')" class="text-[10px] font-black uppercase hover:text-blue-500 transition">Ajustes</button>
+                    <button onclick="showTab('tab-folha')" class="text-[10px] font-black uppercase hover:text-blue-500 transition">Folha</button>
+                    <button onclick="showTab('tab-ferias')" class="text-[10px] font-black uppercase hover:text-blue-500 transition text-yellow-500">Férias</button>
+                    <button onclick="showTab('tab-hist')" class="text-[10px] font-black uppercase hover:text-blue-500 transition">Arquivo</button>
+                    <button onclick="showTab('tab-config')" class="text-[10px] font-black uppercase hover:text-blue-500 transition text-slate-500">Ajustes</button>
                     <button onclick="logout()" class="px-3 py-1 bg-red-500/10 text-red-500 rounded-lg text-[10px] font-black uppercase">Sair</button>
                 </nav>
             </div>
@@ -110,7 +111,6 @@
                                 <input type="number" id="cal-dsr" value="5" class="w-1/2 p-3 bg-slate-800 border border-slate-700 rounded-xl text-xs font-bold text-white text-center">
                             </div>
                         </div>
-                        <div class="text-[9px] font-bold text-blue-400 uppercase pb-3">DSR: Automático (Lei 605/49)</div>
                     </div>
                 </div>
 
@@ -131,16 +131,21 @@
                 </div>
             </section>
 
+            <!-- ABA: FÉRIAS -->
+            <section id="tab-ferias" class="tab-content">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-2xl font-black uppercase italic tracking-tighter">Controle de Férias</h2>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="lista-ferias-cards"></div>
+            </section>
+
             <!-- ABA: HISTÓRICO (ARQUIVO DE HOLERITES) -->
             <section id="tab-hist" class="tab-content">
                 <div class="flex justify-between items-center mb-6">
-                    <h2 class="text-2xl font-black uppercase italic tracking-tighter">Arquivo de Holerites</h2>
+                    <h2 class="text-2xl font-black uppercase italic tracking-tighter">Arquivo de Recibos</h2>
                     <div class="flex items-center gap-4">
-                        <div class="flex flex-col gap-1">
-                            <label class="text-[9px] font-black text-slate-500 uppercase">Filtrar Mês:</label>
-                            <input type="month" id="filtro-hist-mes" onchange="renderHistorico()" class="p-2 bg-slate-800 border border-slate-700 rounded-xl text-xs font-bold text-white">
-                        </div>
-                        <button onclick="imprimirTudo()" class="bg-blue-600 text-white px-4 py-2 mt-4 rounded-xl font-bold text-[10px] uppercase">Imprimir Folha</button>
+                        <input type="month" id="filtro-hist-mes" onchange="renderHistorico()" class="p-2 bg-slate-800 border border-slate-700 rounded-xl text-xs font-bold text-white">
+                        <button onclick="imprimirTudo()" class="bg-blue-600 text-white px-4 py-2 rounded-xl font-bold text-[10px] uppercase">Imprimir Tudo</button>
                     </div>
                 </div>
                 <div id="lista-historico" class="space-y-3"></div>
@@ -174,10 +179,15 @@
                         <option value="HORISTA">HORISTA</option>
                     </select>
                 </div>
-                <div class="flex flex-col gap-1">
-                    <label class="text-[9px] font-black text-slate-500 uppercase">Valor Salário ou Valor Hora</label>
-                    <input type="number" id="func-salario" step="0.01" placeholder="Ex: 2400.00 ou 15.50" required class="w-full p-3 bg-slate-800 border border-slate-700 rounded-xl font-bold text-white">
-                    <p class="text-[8px] text-slate-400">Valores acima de 500.00 são tratados como salário base mensal.</p>
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="flex flex-col gap-1">
+                        <label class="text-[9px] font-black text-slate-500 uppercase">Valor Salário / Hora</label>
+                        <input type="number" id="func-salario" step="0.01" required class="w-full p-3 bg-slate-800 border border-slate-700 rounded-xl font-bold text-white">
+                    </div>
+                    <div class="flex flex-col gap-1">
+                        <label class="text-[9px] font-black text-slate-500 uppercase">Data Admissão</label>
+                        <input type="date" id="func-admissao" required class="w-full p-3 bg-slate-800 border border-slate-700 rounded-xl font-bold text-white">
+                    </div>
                 </div>
                 <div class="flex gap-4 pt-4">
                     <button type="button" onclick="fecharModalFunc()" class="flex-1 p-3 bg-slate-800 text-slate-400 rounded-xl font-black uppercase text-xs">Sair</button>
@@ -187,13 +197,43 @@
         </div>
     </div>
 
-    <!-- PREVIEW HOLERITE -->
+    <!-- MODAL: LANÇAR FÉRIAS -->
+    <div id="modal-ferias" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md hidden items-center justify-center p-4 z-50">
+        <div class="bg-slate-900 w-full max-w-lg rounded-3xl p-8 border border-slate-800">
+            <h3 class="text-xl font-black uppercase mb-2">Lançar Período de Férias</h3>
+            <p id="ferias-nome-display" class="text-blue-500 font-bold text-xs uppercase mb-6"></p>
+            <form id="form-lancar-ferias" class="space-y-4">
+                <input type="hidden" id="ferias-func-id">
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="flex flex-col gap-1">
+                        <label class="text-[9px] font-black text-slate-500 uppercase">Data Início</label>
+                        <input type="date" id="fer-data-inicio" required class="w-full p-3 bg-slate-800 border border-slate-700 rounded-xl font-bold text-white">
+                    </div>
+                    <div class="flex flex-col gap-1">
+                        <label class="text-[9px] font-black text-slate-500 uppercase">Dias de Gozo</label>
+                        <input type="number" id="fer-dias-gozo" value="20" required class="w-full p-3 bg-slate-800 border border-slate-700 rounded-xl font-bold text-white">
+                    </div>
+                </div>
+                <div class="flex flex-col gap-1">
+                    <label class="text-[9px] font-black text-slate-500 uppercase">Venda de Férias (Abono Pecuniário)</label>
+                    <input type="number" id="fer-dias-venda" value="0" class="w-full p-3 bg-slate-800 border border-slate-700 rounded-xl font-bold text-white">
+                    <p class="text-[8px] text-slate-500 italic">Limite legal de venda: 1/3 do período (máx 10 dias).</p>
+                </div>
+                <div class="flex gap-4 pt-4">
+                    <button type="button" onclick="fecharModalFerias()" class="flex-1 p-3 bg-slate-800 text-slate-400 rounded-xl font-black uppercase text-xs">Sair</button>
+                    <button type="submit" class="flex-1 p-3 bg-yellow-600 text-white rounded-xl font-black uppercase text-xs">Gerar Recibo de Férias</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- PREVIEW HOLERITE / FÉRIAS -->
     <div id="holerite-preview-container" class="no-print">
         <div class="max-w-4xl mx-auto flex flex-col gap-4">
             <div class="flex justify-between items-center text-white p-4 bg-slate-900 rounded-2xl no-print border border-slate-800">
-                <h2 class="text-xl font-black uppercase">Recibo Gerado</h2>
+                <h2 class="text-xl font-black uppercase">Visualização de Documento</h2>
                 <div class="flex gap-4">
-                    <button onclick="window.print()" class="bg-blue-600 px-6 py-2 rounded-xl font-bold text-xs uppercase">Imprimir PDF</button>
+                    <button onclick="window.print()" class="bg-blue-600 px-6 py-2 rounded-xl font-bold text-xs uppercase">Imprimir</button>
                     <button onclick="closeHolerite()" class="bg-slate-800 px-6 py-2 rounded-xl font-bold text-xs uppercase">Fechar</button>
                 </div>
             </div>
@@ -205,7 +245,8 @@
         let db = {
             empresa: JSON.parse(localStorage.getItem('dva_emp')) || { nome: 'JCAD INDUSTRIA METALURGICA LTDA', cnpj: '21035310/0001-11' },
             funcionarios: JSON.parse(localStorage.getItem('dva_func')) || [],
-            historico: JSON.parse(localStorage.getItem('dva_hist')) || []
+            historico: JSON.parse(localStorage.getItem('dva_hist')) || [],
+            ferias_gozadas: JSON.parse(localStorage.getItem('dva_ferias')) || []
         };
 
         function init() {
@@ -220,23 +261,175 @@
             renderFuncionarios();
             renderTabelaFolha();
             renderHistorico();
+            renderFerias();
         }
 
         function renderFuncionarios() {
             const list = document.getElementById('lista-funcionarios');
             list.innerHTML = db.funcionarios.map(f => `
                 <div class="card-dark p-6 rounded-3xl">
-                    <div class="text-[8px] font-black text-blue-500 uppercase mb-1">${f.regime}</div>
+                    <div class="flex justify-between items-start">
+                        <div class="text-[8px] font-black text-blue-500 uppercase mb-1">${f.regime}</div>
+                        <div class="text-[8px] font-bold text-slate-500 uppercase">Desde: ${f.admissao.split('-').reverse().join('/')}</div>
+                    </div>
                     <h3 class="text-sm font-black text-white uppercase">${f.nome}</h3>
                     <p class="text-[10px] text-slate-500 uppercase">${f.cargo}</p>
-                    <div class="mt-4 flex gap-2">
-                        <button onclick="editarFunc('${f.id}')" class="text-xs text-blue-400 font-bold">EDITAR</button>
-                        <button onclick="deletarFunc('${f.id}')" class="text-xs text-red-500 font-bold">EXCLUIR</button>
+                    <div class="mt-4 flex gap-2 border-t border-slate-700 pt-4">
+                        <button onclick="editarFunc('${f.id}')" class="text-xs text-blue-400 font-bold uppercase">Editar</button>
+                        <button onclick="deletarFunc('${f.id}')" class="text-xs text-red-500 font-bold uppercase">Excluir</button>
                     </div>
                 </div>
             `).join('');
         }
 
+        function renderFerias() {
+            const list = document.getElementById('lista-ferias-cards');
+            const hoje = new Date();
+
+            list.innerHTML = db.funcionarios.map(f => {
+                const admissao = new Date(f.admissao);
+                const meses = (hoje.getFullYear() - admissao.getFullYear()) * 12 + (hoje.getMonth() - admissao.getMonth());
+                const diasDireito = Math.floor(meses * 2.5); // 30 dias por ano = 2.5 por mês
+                
+                const gozados = db.ferias_gozadas
+                    .filter(g => g.funcId === f.id)
+                    .reduce((acc, curr) => acc + curr.diasGozo + curr.diasVenda, 0);
+                
+                const saldo = Math.max(0, diasDireito - gozados);
+
+                return `
+                    <div class="card-dark p-6 rounded-3xl relative overflow-hidden">
+                        <div class="absolute top-0 right-0 p-4 text-[40px] opacity-10 font-black">🌴</div>
+                        <h3 class="text-sm font-black text-white uppercase mb-1">${f.nome}</h3>
+                        <p class="text-[9px] text-slate-500 uppercase mb-4">Direito Total: ${diasDireito} dias</p>
+                        
+                        <div class="grid grid-cols-2 gap-2 mb-4">
+                            <div class="bg-slate-800 p-3 rounded-2xl text-center">
+                                <p class="text-[8px] font-black text-slate-500 uppercase">Gozados/Vendidos</p>
+                                <p class="text-lg font-black text-red-400">${gozados}</p>
+                            </div>
+                            <div class="bg-slate-800 p-3 rounded-2xl text-center border border-blue-500/30">
+                                <p class="text-[8px] font-black text-slate-500 uppercase">Saldo Atual</p>
+                                <p class="text-lg font-black text-green-400">${saldo}</p>
+                            </div>
+                        </div>
+
+                        <button onclick="abrirModalFerias('${f.id}')" class="w-full bg-yellow-600 hover:bg-yellow-500 text-white p-2 rounded-xl text-[10px] font-black uppercase transition-colors">
+                            Lançar Período
+                        </button>
+
+                        <div class="mt-4 space-y-1">
+                            <p class="text-[8px] font-bold text-slate-500 uppercase">Histórico Recente:</p>
+                            ${db.ferias_gozadas.filter(g => g.funcId === f.id).slice(-2).map(g => `
+                                <div class="text-[9px] flex justify-between text-slate-400">
+                                    <span>${g.dataInicio.split('-').reverse().join('/')}</span>
+                                    <span>${g.diasGozo} dias (+${g.diasVenda}v)</span>
+                                </div>
+                            `).join('') || '<p class="text-[9px] italic text-slate-600">Nenhum registro</p>'}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function abrirModalFerias(id) {
+            const f = db.funcionarios.find(x => x.id === id);
+            document.getElementById('ferias-func-id').value = id;
+            document.getElementById('ferias-nome-display').innerText = f.nome;
+            document.getElementById('modal-ferias').style.display = 'flex';
+        }
+
+        function fecharModalFerias() { document.getElementById('modal-ferias').style.display = 'none'; }
+
+        document.getElementById('form-lancar-ferias').onsubmit = (e) => {
+            e.preventDefault();
+            const fId = document.getElementById('ferias-func-id').value;
+            const f = db.funcionarios.find(x => x.id === fId);
+            const diasGozo = parseInt(document.getElementById('fer-dias-gozo').value);
+            const diasVenda = parseInt(document.getElementById('fer-dias-venda').value);
+            const dataInicio = document.getElementById('fer-data-inicio').value;
+
+            // Lógica de Cálculo de Férias
+            let salarioBase;
+            if (f.salario > 500) { salarioBase = f.salario; } 
+            else { salarioBase = f.salario * 220; }
+
+            const valorDia = salarioBase / 30;
+            const valorGozo = valorDia * diasGozo;
+            const umTercoGozo = valorGozo / 3;
+            
+            const valorVenda = valorDia * diasVenda;
+            const umTercoVenda = valorVenda / 3;
+
+            const totalBruto = valorGozo + umTercoGozo + valorVenda + umTercoVenda;
+            const inss = (valorGozo + umTercoGozo) * 0.09; // Apenas sobre o gozo, venda é isenta
+            const liquido = totalBruto - inss;
+
+            const registroFerias = {
+                id: `FER-${Date.now()}`,
+                funcId: f.id,
+                nome: f.nome,
+                cargo: f.cargo,
+                tipo: "RECIBO DE FÉRIAS",
+                mes: dataInicio.substring(0, 7),
+                dataInicio,
+                diasGozo,
+                diasVenda,
+                salarioBase,
+                valorGozo,
+                umTercoGozo,
+                valorVenda,
+                umTercoVenda,
+                inss,
+                liquido,
+                regime: f.regime
+            };
+
+            db.ferias_gozadas.push({ funcId: f.id, dataInicio, diasGozo, diasVenda });
+            db.historico.push(registroFerias);
+            
+            salvarDB();
+            fecharModalFerias();
+            renderFerias();
+            renderHistorico();
+            visualizarHolerite(registroFerias.id);
+        };
+
+        function gerarTemplateFérias(h) {
+            return `
+                <div class="holerite-page">
+                    <div class="border border-black p-2 flex justify-between items-center mb-1">
+                        <div><h1 class="font-bold text-sm uppercase">${db.empresa.nome}</h1><p class="text-[9px]">CNPJ: ${db.empresa.cnpj}</p></div>
+                        <div class="text-right"><h2 class="font-bold text-[10px]">AVISO E RECIBO DE FÉRIAS</h2><p class="text-[9px] font-bold">INÍCIO: ${h.dataInicio.split('-').reverse().join('/')}</p></div>
+                    </div>
+                    <div class="border border-black border-t-0 p-1 uppercase font-bold text-[9px] grid grid-cols-2">
+                        <div class="border-r border-black p-1">COLABORADOR: ${h.nome}</div>
+                        <div class="p-1">CARGO: ${h.cargo}</div>
+                    </div>
+                    <table class="w-full border-collapse mt-2">
+                        <thead><tr class="bg-gray-100 font-bold uppercase text-[9px]"><th>DESCRIÇÃO</th><th>REF</th><th>VENCIMENTOS</th><th>DESCONTOS</th></tr></thead>
+                        <tbody class="text-[9px]">
+                            <tr><td>VALOR DAS FÉRIAS (GOZO)</td><td class="text-center">${h.diasGozo}d</td><td class="text-right">${h.valorGozo.toLocaleString('pt-BR',{minimumFractionDigits:2})}</td><td></td></tr>
+                            <tr><td>1/3 CONSTITUCIONAL S/ GOZO</td><td class="text-center">33.3%</td><td class="text-right">${h.umTercoGozo.toLocaleString('pt-BR',{minimumFractionDigits:2})}</td><td></td></tr>
+                            ${h.diasVenda > 0 ? `
+                                <tr><td>ABONO PECUNIÁRIO (VENDA)</td><td class="text-center">${h.diasVenda}d</td><td class="text-right">${h.valorVenda.toLocaleString('pt-BR',{minimumFractionDigits:2})}</td><td></td></tr>
+                                <tr><td>1/3 S/ ABONO PECUNIÁRIO</td><td class="text-center">33.3%</td><td class="text-right">${h.umTercoVenda.toLocaleString('pt-BR',{minimumFractionDigits:2})}</td><td></td></tr>
+                            ` : ''}
+                            <tr><td>INSS S/ FÉRIAS</td><td class="text-center">9%</td><td></td><td class="text-right">${h.inss.toLocaleString('pt-BR',{minimumFractionDigits:2})}</td></tr>
+                        </tbody>
+                        <tfoot class="font-bold text-[9px]">
+                            <tr><td colspan="2" class="text-right">TOTAIS</td><td class="text-right">R$ ${(h.valorGozo + h.umTercoGozo + h.valorVenda + h.umTercoVenda).toLocaleString('pt-BR',{minimumFractionDigits:2})}</td><td class="text-right">R$ ${h.inss.toLocaleString('pt-BR',{minimumFractionDigits:2})}</td></tr>
+                        </tfoot>
+                    </table>
+                    <div class="mt-4 border border-black p-2 flex justify-between items-end">
+                        <div><p class="text-[8px] font-bold uppercase">Líquido a Receber</p><p class="text-xl font-black">R$ ${h.liquido.toLocaleString('pt-BR',{minimumFractionDigits:2})}</p></div>
+                        <div class="w-2/3 border-t border-black text-center text-[8px] pt-1">RECEBI O VALOR ACIMA EM ___/___/___ - ASSINATURA</div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // --- FUNÇÕES BASE DO SISTEMA ---
         function abrirModalFunc() {
             document.getElementById('form-cad-func').reset();
             document.getElementById('func-id').value = "";
@@ -253,14 +446,14 @@
                 nome: document.getElementById('func-nome').value.toUpperCase(),
                 cargo: document.getElementById('func-cargo').value.toUpperCase(),
                 regime: document.getElementById('func-regime').value,
-                salario: parseFloat(document.getElementById('func-salario').value)
+                salario: parseFloat(document.getElementById('func-salario').value),
+                admissao: document.getElementById('func-admissao').value
             };
             db.funcionarios = db.funcionarios.filter(x => x.id !== id);
             db.funcionarios.push(novo);
             salvarDB();
             fecharModalFunc();
-            renderFuncionarios();
-            renderTabelaFolha();
+            init();
         };
 
         function editarFunc(id) {
@@ -270,15 +463,15 @@
             document.getElementById('func-cargo').value = f.cargo;
             document.getElementById('func-regime').value = f.regime;
             document.getElementById('func-salario').value = f.salario;
+            document.getElementById('func-admissao').value = f.admissao;
             document.getElementById('modal-func').style.display = 'flex';
         }
 
         function deletarFunc(id) {
-            if(confirm("Deseja realmente excluir este colaborador?")) {
+            if(confirm("Excluir colaborador? Dados de férias e histórico serão mantidos mas ele não aparecerá em novos lançamentos.")) {
                 db.funcionarios = db.funcionarios.filter(x => x.id !== id);
                 salvarDB();
-                renderFuncionarios();
-                renderTabelaFolha();
+                init();
             }
         }
 
@@ -290,12 +483,8 @@
                         <div class="font-bold text-white uppercase">${f.nome}</div>
                         <div class="text-[8px] text-slate-500 font-bold uppercase italic">${f.regime}</div>
                     </td>
-                    <td class="p-4">
-                        <input type="time" id="hex-${f.id}" class="bg-slate-800 border border-slate-700 rounded p-2 text-white w-20 text-xs">
-                    </td>
-                    <td class="p-4">
-                        <input type="time" id="hfa-${f.id}" class="bg-slate-800 border border-slate-700 rounded p-2 text-white w-20 text-xs">
-                    </td>
+                    <td class="p-4"><input type="time" id="hex-${f.id}" class="bg-slate-800 border border-slate-700 rounded p-2 text-white w-20 text-xs"></td>
+                    <td class="p-4"><input type="time" id="hfa-${f.id}" class="bg-slate-800 border border-slate-700 rounded p-2 text-white w-20 text-xs"></td>
                     <td class="p-4">
                         <div class="flex flex-col gap-1">
                             <input type="text" id="add-desc-${f.id}" placeholder="Nome" class="bg-slate-900 border border-slate-700 rounded p-1 text-[9px] text-white">
@@ -322,58 +511,42 @@
             const uteis = parseInt(document.getElementById('cal-uteis').value) || 26;
             const dsrs = parseInt(document.getElementById('cal-dsr').value) || 5;
 
-            if(!mes) return alert("Selecione o Mês de competência!");
+            if(!mes) return alert("Mês!");
 
             const hex = document.getElementById(`hex-${fId}`).value || "00:00";
             const hfa = document.getElementById(`hfa-${fId}`).value || "00:00";
-            
             const [hE, mE] = hex.split(':').map(Number);
             const [hF, mF] = hfa.split(':').map(Number);
-            
             const totalHex = hE + (mE/60);
             const totalHfa = hF + (mF/60);
 
-            const addNome = document.getElementById(`add-desc-${fId}`).value.toUpperCase() || "ADICIONAL";
             const addVal = parseFloat(document.getElementById(`add-val-${fId}`).value) || 0;
-            const extNome = document.getElementById(`ext-desc-${fId}`).value.toUpperCase() || "DESCONTO";
             const extVal = parseFloat(document.getElementById(`ext-val-${fId}`).value) || 0;
 
-            // NOVA LÓGICA SALARIAL:
-            // Se o valor cadastrado for maior que 500, tratamos como Salário Mensal total.
-            // Se for menor, tratamos como Valor/Hora puro.
-            let valorHoraCalculado;
-            let salarioBaseReferencia;
-
-            if (f.salario > 500) {
-                valorHoraCalculado = f.salario / 220;
-                salarioBaseReferencia = f.salario;
-            } else {
-                valorHoraCalculado = f.salario;
-                salarioBaseReferencia = f.salario * 220; // Estimativa para o holerite
-            }
+            let vHora, salBase;
+            if (f.salario > 500) { vHora = f.salario / 220; salBase = f.salario; } 
+            else { vHora = f.salario; salBase = f.salario * 220; }
             
-            const vHE = totalHex * valorHoraCalculado * 1.5; 
-            const vFalta = totalHfa * valorHoraCalculado;
+            const vHE = totalHex * vHora * 1.5; 
+            const vFalta = totalHfa * vHora;
             const vDsrDesc = (vFalta / uteis) * dsrs;
+            const inss = (salBase + vHE + addVal) * 0.09;
 
-            const proventos = salarioBaseReferencia + vHE + addVal;
-            const inss = proventos * 0.09; 
-
-            const registro = {
+            const reg = {
                 id: `${f.id}-${mes}-${tipo}`,
                 funcId: f.id, nome: f.nome, cargo: f.cargo, mes, tipo, regime: f.regime,
                 vHE, totalHex, vFalta, totalHfa, vDsrDesc, inss,
-                extraAdd: { nome: addNome, valor: addVal },
-                extraDesc: { nome: extNome, valor: extVal },
-                salarioBase: salarioBaseReferencia,
-                liquido: proventos - (vFalta + vDsrDesc + inss + extVal)
+                extraAdd: { nome: document.getElementById(`add-desc-${fId}`).value || "ADICIONAL", valor: addVal },
+                extraDesc: { nome: document.getElementById(`ext-desc-${fId}`).value || "DESCONTO", valor: extVal },
+                salarioBase: salBase,
+                liquido: (salBase + vHE + addVal) - (vFalta + vDsrDesc + inss + extVal)
             };
 
-            db.historico = db.historico.filter(h => h.id !== registro.id);
-            db.historico.push(registro);
+            db.historico = db.historico.filter(h => h.id !== reg.id);
+            db.historico.push(reg);
             salvarDB();
             renderHistorico();
-            alert(`Gravado: ${f.nome} - ${mes}`);
+            alert("Gravado!");
         }
 
         function renderHistorico() {
@@ -382,35 +555,24 @@
             const filtrados = db.historico.filter(h => h.mes === filtroMes);
 
             if(filtrados.length === 0) {
-                list.innerHTML = `<div class="text-center p-20 card-dark rounded-3xl text-slate-500 uppercase font-bold">Nenhum registro encontrado para este mês.</div>`;
+                list.innerHTML = `<div class="text-center p-10 card-dark rounded-3xl text-slate-500 uppercase font-bold text-xs">Sem registros em ${filtroMes}</div>`;
                 return;
             }
 
             list.innerHTML = filtrados.map(h => `
-                <div class="card-dark p-4 rounded-2xl flex justify-between items-center border-l-4 border-blue-500">
+                <div class="card-dark p-4 rounded-2xl flex justify-between items-center border-l-4 ${h.tipo.includes('FÉRIAS') ? 'border-yellow-500' : 'border-blue-500'}">
                     <div>
                         <div class="font-bold text-white text-xs uppercase">${h.nome}</div>
-                        <div class="text-[9px] text-slate-500 uppercase">${h.tipo} | ${h.regime}</div>
+                        <div class="text-[8px] text-slate-500 uppercase">${h.tipo} | ${h.regime}</div>
                     </div>
-                    <div class="flex items-center gap-6">
+                    <div class="flex items-center gap-4">
                         <div class="text-right">
-                            <div class="text-[10px] font-black text-blue-400">R$ ${h.liquido.toLocaleString('pt-BR', {minimumFractionDigits:2})}</div>
+                            <div class="text-[10px] font-black text-white">R$ ${h.liquido.toLocaleString('pt-BR', {minimumFractionDigits:2})}</div>
                         </div>
-                        <div class="flex gap-2">
-                            <button onclick="visualizarHolerite('${h.id}')" class="bg-slate-700 p-2 rounded-lg hover:bg-slate-600">📄</button>
-                            <button onclick="removerHistorico('${h.id}')" class="bg-red-500/10 p-2 rounded-lg text-red-500">🗑️</button>
-                        </div>
+                        <button onclick="visualizarHolerite('${h.id}')" class="bg-slate-700 p-2 rounded-lg text-xs">📄</button>
                     </div>
                 </div>
             `).join('');
-        }
-
-        function removerHistorico(id) {
-            if(confirm("Remover este holerite do arquivo?")) {
-                db.historico = db.historico.filter(h => h.id !== id);
-                salvarDB();
-                renderHistorico();
-            }
         }
 
         function gerarTemplateHolerite(h) {
@@ -418,20 +580,13 @@
             const refSalario = h.regime === 'HORISTA' ? "220:00" : "30D";
 
             let linhas = `<tr><td class="text-center">001</td><td>${labelSalario}</td><td class="text-center">${refSalario}</td><td class="text-right">${h.salarioBase.toLocaleString('pt-BR',{minimumFractionDigits:2})}</td><td></td></tr>`;
-
-            if(h.vHE > 0) {
-                linhas += `<tr><td class="text-center">050</td><td>HORA EXTRA 50%</td><td class="text-center">${h.totalHex.toFixed(2)}</td><td class="text-right">${h.vHE.toLocaleString('pt-BR',{minimumFractionDigits:2})}</td><td></td></tr>`;
-            }
-            if(h.extraAdd.valor > 0) {
-                linhas += `<tr><td class="text-center">100</td><td>${h.extraAdd.nome}</td><td class="text-center">---</td><td class="text-right">${h.extraAdd.valor.toLocaleString('pt-BR',{minimumFractionDigits:2})}</td><td></td></tr>`;
-            }
+            if(h.vHE > 0) linhas += `<tr><td class="text-center">050</td><td>HORA EXTRA 50%</td><td class="text-center">${h.totalHex.toFixed(2)}</td><td class="text-right">${h.vHE.toLocaleString('pt-BR',{minimumFractionDigits:2})}</td><td></td></tr>`;
+            if(h.extraAdd.valor > 0) linhas += `<tr><td class="text-center">100</td><td>${h.extraAdd.nome}</td><td class="text-center">---</td><td class="text-right">${h.extraAdd.valor.toLocaleString('pt-BR',{minimumFractionDigits:2})}</td><td></td></tr>`;
             if(h.vFalta > 0) {
                 linhas += `<tr><td class="text-center">901</td><td>FALTAS</td><td class="text-center">${h.totalHfa.toFixed(2)}</td><td></td><td class="text-right">${h.vFalta.toLocaleString('pt-BR',{minimumFractionDigits:2})}</td></tr>`;
                 linhas += `<tr><td class="text-center">902</td><td>DSR S/ FALTAS</td><td class="text-center">---</td><td></td><td class="text-right">${h.vDsrDesc.toLocaleString('pt-BR',{minimumFractionDigits:2})}</td></tr>`;
             }
-            if(h.extraDesc.valor > 0) {
-                linhas += `<tr><td class="text-center">999</td><td>${h.extraDesc.nome}</td><td class="text-center">---</td><td></td><td class="text-right">${h.extraDesc.valor.toLocaleString('pt-BR',{minimumFractionDigits:2})}</td></tr>`;
-            }
+            if(h.extraDesc.valor > 0) linhas += `<tr><td class="text-center">999</td><td>${h.extraDesc.nome}</td><td class="text-center">---</td><td></td><td class="text-right">${h.extraDesc.valor.toLocaleString('pt-BR',{minimumFractionDigits:2})}</td></tr>`;
             linhas += `<tr><td class="text-center">950</td><td>INSS</td><td class="text-center">9%</td><td></td><td class="text-right">${h.inss.toLocaleString('pt-BR',{minimumFractionDigits:2})}</td></tr>`;
 
             const totalVenc = h.salarioBase + h.vHE + h.extraAdd.valor;
@@ -456,7 +611,7 @@
                     </table>
                     <div class="flex justify-between items-center mt-2 border border-black p-2">
                         <div><p class="text-[8px] font-bold">VALOR LÍQUIDO</p><p class="text-lg font-black">R$ ${h.liquido.toLocaleString('pt-BR',{minimumFractionDigits:2})}</p></div>
-                        <div class="w-1/2 text-center text-[9px] border-t border-black mt-4">ASSINATURA DO FUNCIONÁRIO</div>
+                        <div class="w-1/2 text-center text-[9px] border-t border-black mt-4">ASSINATURA</div>
                     </div>
                 </div>
             `;
@@ -464,15 +619,18 @@
 
         function visualizarHolerite(id) {
             const h = db.historico.find(x => x.id === id);
-            document.getElementById('print-area').innerHTML = gerarTemplateHolerite(h);
+            if(h.tipo === "RECIBO DE FÉRIAS") {
+                document.getElementById('print-area').innerHTML = gerarTemplateFérias(h);
+            } else {
+                document.getElementById('print-area').innerHTML = gerarTemplateHolerite(h);
+            }
             document.getElementById('holerite-preview-container').style.display = 'block';
         }
 
         function imprimirTudo() {
             const filtroMes = document.getElementById('filtro-hist-mes').value;
             const filtrados = db.historico.filter(h => h.mes === filtroMes);
-            if(filtrados.length === 0) return alert("Nenhum dado para este mês.");
-            document.getElementById('print-area').innerHTML = filtrados.map(h => gerarTemplateHolerite(h)).join('');
+            document.getElementById('print-area').innerHTML = filtrados.map(h => h.tipo === "RECIBO DE FÉRIAS" ? gerarTemplateFérias(h) : gerarTemplateHolerite(h)).join('');
             document.getElementById('holerite-preview-container').style.display = 'block';
         }
 
@@ -482,6 +640,7 @@
             localStorage.setItem('dva_emp', JSON.stringify(db.empresa));
             localStorage.setItem('dva_func', JSON.stringify(db.funcionarios));
             localStorage.setItem('dva_hist', JSON.stringify(db.historico));
+            localStorage.setItem('dva_ferias', JSON.stringify(db.ferias_gozadas));
         }
 
         function showTab(id) {
@@ -504,8 +663,7 @@
             db.empresa.nome = document.getElementById('emp-nome').value.toUpperCase();
             db.empresa.cnpj = document.getElementById('emp-cnpj').value;
             salvarDB();
-            document.getElementById('topEmpresaNome').innerText = db.empresa.nome;
-            alert("Empresa atualizada!");
+            alert("Ajustado!");
         }
 
         window.onload = () => {
