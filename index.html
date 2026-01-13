@@ -17,7 +17,7 @@
         .tab-content { display: none; }
         .tab-content.active { display: block; }
         
-        #login-screen.hidden { display: none; }
+        .auth-screen.hidden { display: none; }
         #main-app.hidden { display: none; }
 
         @media print {
@@ -37,16 +37,18 @@
 </head>
 <body class="antialiased">
 
-    <!-- TELA DE LOGIN -->
-    <section id="login-screen" class="fixed inset-0 bg-slate-900 flex items-center justify-center p-4 z-[100]">
-        <div class="bg-white w-full max-w-md rounded-3xl shadow-2xl p-8 md:p-10">
+    <!-- SEÇÃO DE AUTENTICAÇÃO -->
+    <section id="auth-container" class="fixed inset-0 bg-slate-900 flex items-center justify-center p-4 z-[100]">
+        
+        <!-- TELA DE LOGIN -->
+        <div id="login-box" class="auth-screen bg-white w-full max-w-md rounded-3xl shadow-2xl p-8 md:p-10">
             <div class="text-center mb-8">
                 <span class="bg-blue-600 text-white px-4 py-1 rounded font-black italic tracking-tighter text-2xl">M-PRO</span>
                 <p class="text-slate-400 text-xs font-bold uppercase mt-4 tracking-widest">Acesso ao Sistema</p>
             </div>
-            <form id="form-login" class="space-y-6">
+            <form id="form-login" class="space-y-4">
                 <div>
-                    <label class="text-[10px] font-black uppercase text-slate-400 mb-1 block">Usuário</label>
+                    <label class="text-[10px] font-black uppercase text-slate-400 mb-1 block">Usuário ou E-mail</label>
                     <input type="text" id="login-user" required class="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl font-bold outline-none focus:ring-2 ring-blue-500 transition-all">
                 </div>
                 <div>
@@ -54,22 +56,51 @@
                     <input type="password" id="login-pass" required class="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl font-bold outline-none focus:ring-2 ring-blue-500 transition-all">
                 </div>
                 <div id="login-error" class="hidden text-red-500 text-[10px] font-bold uppercase text-center bg-red-50 p-2 rounded-lg">
-                    Usuário ou senha incorretos!
+                    Credenciais incorretas ou conta inexistente!
                 </div>
                 <button type="submit" class="w-full bg-slate-900 text-white p-4 rounded-2xl font-black uppercase hover:bg-blue-600 transition-all shadow-xl shadow-slate-200">Entrar no Painel</button>
             </form>
-            <p class="text-center text-[10px] text-slate-300 mt-8 font-medium">© 2024 M-PRO Gestão Industrial</p>
+            <div class="mt-6 text-center">
+                <p class="text-xs text-slate-500 font-medium">Não tem uma conta?</p>
+                <button onclick="toggleAuth('signup')" class="text-blue-600 text-xs font-black uppercase mt-1 hover:underline">Criar Nova Conta</button>
+            </div>
         </div>
+
+        <!-- TELA DE CADASTRO -->
+        <div id="signup-box" class="auth-screen hidden bg-white w-full max-w-md rounded-3xl shadow-2xl p-8 md:p-10">
+            <div class="text-center mb-8">
+                <span class="bg-slate-900 text-white px-4 py-1 rounded font-black italic tracking-tighter text-2xl">M-PRO</span>
+                <p class="text-slate-400 text-xs font-bold uppercase mt-4 tracking-widest">Cadastro de Usuário</p>
+            </div>
+            <form id="form-signup" class="space-y-4">
+                <div>
+                    <label class="text-[10px] font-black uppercase text-slate-400 mb-1 block">E-mail</label>
+                    <input type="email" id="reg-email" required class="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl font-bold outline-none focus:ring-2 ring-blue-500 transition-all">
+                </div>
+                <div>
+                    <label class="text-[10px] font-black uppercase text-slate-400 mb-1 block">Escolha um Usuário</label>
+                    <input type="text" id="reg-user" required class="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl font-bold outline-none focus:ring-2 ring-blue-500 transition-all">
+                </div>
+                <div>
+                    <label class="text-[10px] font-black uppercase text-slate-400 mb-1 block">Crie uma Senha</label>
+                    <input type="password" id="reg-pass" required class="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl font-bold outline-none focus:ring-2 ring-blue-500 transition-all">
+                </div>
+                <button type="submit" class="w-full bg-blue-600 text-white p-4 rounded-2xl font-black uppercase hover:bg-slate-900 transition-all shadow-xl shadow-blue-100">Registrar e Acessar</button>
+            </form>
+            <div class="mt-6 text-center">
+                <button onclick="toggleAuth('login')" class="text-slate-400 text-xs font-black uppercase hover:text-slate-900 transition">Voltar para o Login</button>
+            </div>
+        </div>
+
     </section>
 
     <!-- SISTEMA PRINCIPAL -->
     <div id="main-app" class="hidden">
-        <!-- Navegação Principal (No-Print) -->
         <header class="no-print bg-slate-900 text-white shadow-lg">
             <div class="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
                 <div class="flex items-center gap-2">
                     <span class="bg-blue-600 px-3 py-1 rounded font-black italic tracking-tighter">M-PRO</span>
-                    <h1 id="topEmpresaNome" class="text-sm font-bold uppercase truncate max-w-[200px]">Minha Empresa</h1>
+                    <h1 id="topEmpresaNome" class="text-sm font-bold uppercase truncate max-w-[200px]">Empresa</h1>
                 </div>
                 <nav class="flex gap-1 md:gap-4 overflow-x-auto">
                     <button onclick="showTab('tab-func')" class="nav-btn px-3 py-2 text-[10px] font-bold uppercase hover:text-blue-400 transition">Funcionários</button>
@@ -82,6 +113,7 @@
         </header>
 
         <main class="max-w-7xl mx-auto p-4 md:p-8 no-print">
+            <!-- Os conteúdos das abas permanecem iguais aos anteriores -->
             
             <!-- ABA: FUNCIONÁRIOS -->
             <section id="tab-func" class="tab-content active">
@@ -89,9 +121,7 @@
                     <h2 class="text-2xl font-black text-slate-800 uppercase italic">Colaboradores</h2>
                     <button onclick="toggleModal('modal-func')" class="bg-blue-600 text-white px-6 py-2 rounded-full text-xs font-bold hover:bg-blue-700 transition shadow-lg shadow-blue-200">+ ADICIONAR</button>
                 </div>
-                <div id="lista-funcionarios" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    <!-- Cards injetados via JS -->
-                </div>
+                <div id="lista-funcionarios" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
             </section>
 
             <!-- ABA: LANÇAR FOLHA -->
@@ -111,7 +141,6 @@
                         </div>
                     </div>
                 </div>
-                
                 <div class="bg-white rounded-3xl shadow-sm border border-slate-200 overflow-hidden">
                     <table class="w-full text-left text-xs">
                         <thead class="bg-slate-50 text-slate-400 font-black uppercase border-b">
@@ -123,9 +152,7 @@
                                 <th class="p-4 text-center">Ações</th>
                             </tr>
                         </thead>
-                        <tbody id="tabela-lancamento">
-                            <!-- Linhas injetadas via JS -->
-                        </tbody>
+                        <tbody id="tabela-lancamento"></tbody>
                     </table>
                 </div>
             </section>
@@ -133,9 +160,7 @@
             <!-- ABA: HISTÓRICO -->
             <section id="tab-hist" class="tab-content">
                 <h2 class="text-2xl font-black text-slate-800 uppercase italic mb-6">Histórico de Holerites</h2>
-                <div id="lista-historico" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    <!-- Cards injetados via JS -->
-                </div>
+                <div id="lista-historico" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
             </section>
 
             <!-- ABA: CONFIGURAÇÕES -->
@@ -164,7 +189,7 @@
         </main>
     </div>
 
-    <!-- MODAL: FUNCIONÁRIO (No-Print) -->
+    <!-- MODAL: FUNCIONÁRIO -->
     <div id="modal-func" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm hidden items-center justify-center p-4 z-50 no-print">
         <div class="bg-white w-full max-w-lg rounded-3xl shadow-2xl p-8">
             <h3 id="modal-title" class="text-xl font-black text-slate-800 mb-6 uppercase italic">Novo Cadastro</h3>
@@ -200,17 +225,16 @@
         </div>
     </div>
 
-    <!-- ÁREA DE IMPRESSÃO (Oculta em tela) -->
+    <!-- ÁREA DE IMPRESSÃO -->
     <div id="print-area" class="print-only"></div>
 
     <script>
-        // --- CREDENCIAIS DE ACESSO ---
-        const CREDENTIALS = {
-            user: "admin",
-            pass: "mpro2024" // Mude sua senha aqui
-        };
+        // --- GERENCIAMENTO DE USUÁRIOS (LOCALSTORAGE) ---
+        let usersDB = JSON.parse(localStorage.getItem('mpro_users')) || [
+            { user: "admin", pass: "mpro2024", email: "admin@mpro.com" }
+        ];
 
-        // --- ESTADO GLOBAL ---
+        // --- ESTADO GLOBAL DO SISTEMA ---
         let db = {
             empresa: JSON.parse(localStorage.getItem('mpro_emp')) || { nome: 'MINHA METALURGICA', cnpj: '', cidade: '' },
             funcionarios: JSON.parse(localStorage.getItem('mpro_func')) || [],
@@ -219,15 +243,47 @@
 
         const SALARIO_MINIMO = 1412.00;
 
-        // --- LÓGICA DE LOGIN ---
+        // --- LÓGICA DE AUTENTICAÇÃO ---
+        function toggleAuth(target) {
+            document.querySelectorAll('.auth-screen').forEach(el => el.classList.add('hidden'));
+            if(target === 'signup') document.getElementById('signup-box').classList.remove('hidden');
+            else document.getElementById('login-box').classList.remove('hidden');
+        }
+
+        // Cadastro
+        document.getElementById('form-signup').onsubmit = (e) => {
+            e.preventDefault();
+            const email = document.getElementById('reg-email').value;
+            const user = document.getElementById('reg-user').value;
+            const pass = document.getElementById('reg-pass').value;
+
+            if(usersDB.find(u => u.user === user || u.email === email)) {
+                alert("Usuário ou e-mail já cadastrado!");
+                return;
+            }
+
+            const newUser = { email, user, pass };
+            usersDB.push(newUser);
+            localStorage.setItem('mpro_users', JSON.stringify(usersDB));
+            
+            // Login Automático
+            sessionStorage.setItem('mpro_auth', 'true');
+            sessionStorage.setItem('mpro_current_user', user);
+            checkAuth();
+        };
+
+        // Login
         document.getElementById('form-login').onsubmit = (e) => {
             e.preventDefault();
-            const user = document.getElementById('login-user').value;
-            const pass = document.getElementById('login-pass').value;
+            const userInput = document.getElementById('login-user').value;
+            const passInput = document.getElementById('login-pass').value;
             const errorMsg = document.getElementById('login-error');
 
-            if (user === CREDENTIALS.user && pass === CREDENTIALS.pass) {
+            const found = usersDB.find(u => (u.user === userInput || u.email === userInput) && u.pass === passInput);
+
+            if (found) {
                 sessionStorage.setItem('mpro_auth', 'true');
+                sessionStorage.setItem('mpro_current_user', found.user);
                 errorMsg.classList.add('hidden');
                 checkAuth();
             } else {
@@ -238,38 +294,37 @@
 
         function checkAuth() {
             const isAuth = sessionStorage.getItem('mpro_auth');
-            const loginScreen = document.getElementById('login-screen');
+            const authContainer = document.getElementById('auth-container');
             const mainApp = document.getElementById('main-app');
 
             if (isAuth === 'true') {
-                loginScreen.classList.add('hidden');
+                authContainer.classList.add('hidden');
                 mainApp.classList.remove('hidden');
                 init();
             } else {
-                loginScreen.classList.remove('hidden');
+                authContainer.classList.remove('hidden');
                 mainApp.classList.add('hidden');
             }
         }
 
         function logout() {
             sessionStorage.removeItem('mpro_auth');
+            sessionStorage.removeItem('mpro_current_user');
             location.reload();
         }
 
-        // --- INICIALIZAÇÃO DO SISTEMA ---
+        // --- LÓGICA DO SISTEMA (IGUAL ANTERIOR) ---
         function init() {
             document.getElementById('topEmpresaNome').innerText = db.empresa.nome;
             document.getElementById('emp-nome').value = db.empresa.nome;
             document.getElementById('emp-cnpj').value = db.empresa.cnpj;
             document.getElementById('emp-cidade').value = db.empresa.cidade;
             document.getElementById('folha-mes').value = new Date().toISOString().slice(0, 7);
-            
             renderFuncionarios();
             renderTabelaFolha();
             renderHistorico();
         }
 
-        // --- NAVEGAÇÃO ---
         function showTab(id) {
             document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
             document.getElementById(id).classList.add('active');
@@ -286,7 +341,6 @@
             }
         }
 
-        // --- CRUD EMPRESA ---
         document.getElementById('form-empresa').onsubmit = (e) => {
             e.preventDefault();
             db.empresa = {
@@ -299,7 +353,6 @@
             alert('Configurações salvas!');
         };
 
-        // --- CRUD FUNCIONÁRIOS ---
         document.getElementById('form-funcionario').onsubmit = (e) => {
             e.preventDefault();
             const id = document.getElementById('f-id').value;
@@ -311,14 +364,12 @@
                 adm: document.getElementById('f-adm').value,
                 insal: document.getElementById('f-insal').checked
             };
-
             if(id) {
                 const index = db.funcionarios.findIndex(f => f.id === id);
                 db.funcionarios[index] = func;
             } else {
                 db.funcionarios.push(func);
             }
-
             saveAndRefresh();
             toggleModal('modal-func');
         };
@@ -343,37 +394,29 @@
             }
         }
 
-        // --- LÓGICA DE FOLHA ---
         function processarLançamento(fId) {
             const mes = document.getElementById('folha-mes').value;
             const tipo = document.getElementById('folha-tipo').value;
             const f = db.funcionarios.find(x => x.id === fId);
-
             if(!mes) return alert("Selecione o mês!");
-
             const hExStr = document.getElementById(`hex-${fId}`).value || "00:00";
             const hFaStr = document.getElementById(`hfa-${fId}`).value || "00:00";
             const descEmp = parseFloat(document.getElementById(`emp-${fId}`).value) || 0;
-
             const [hE, mE] = hExStr.split(':').map(Number);
             const decExtra = hE + (mE/60);
             const [hF, mF] = hFaStr.split(':').map(Number);
             const decFalta = hF + (mF/60);
-
             const valHora = f.salario / 220;
             const vExtra = decExtra * valHora * 1.5;
             const vDsr = (vExtra / 25) * 5;
             const vInsal = f.insal ? (SALARIO_MINIMO * 0.20) : 0;
             const vFalta = decFalta * valHora;
-
             let vAdiantamento = 0;
             if (tipo === 'mensal') {
                 const jaPago = db.historico.find(h => h.funcId === fId && h.mes === mes && h.tipo === 'quinzena');
                 if (jaPago) vAdiantamento = jaPago.proventos;
             }
-
             const proventos = tipo === 'quinzena' ? (f.salario * 0.40) : (f.salario + vExtra + vDsr + vInsal);
-            
             let inss = 0;
             if (tipo === 'mensal') {
                 const baseInss = proventos - vFalta;
@@ -381,42 +424,29 @@
                 else if (baseInss <= 2666) inss = (baseInss * 0.09) - 21.18;
                 else inss = (baseInss * 0.12) - 101.18;
             }
-
             const descontos = inss + vFalta + vAdiantamento + descEmp;
-
             const registro = {
                 id: Date.now().toString(),
-                funcId: f.id,
-                nome: f.nome,
-                cargo: f.cargo,
-                mes,
-                tipo,
-                proventos,
-                descontos,
-                liquido: proventos - descontos,
+                funcId: f.id, nome: f.nome, cargo: f.cargo, mes, tipo, proventos, descontos, liquido: proventos - descontos,
                 detalhes: { vExtra, vDsr, vInsal, vFalta, inss, vAdiantamento, descEmp, hExStr, hFaStr }
             };
-
             db.historico = db.historico.filter(h => !(h.funcId === fId && h.mes === mes && h.tipo === tipo));
             db.historico.push(registro);
-            
             saveAndRefresh();
             alert(`Gravado com sucesso!`);
         }
 
-        // --- IMPRESSÃO ---
         function imprimir(hId) {
             const h = db.historico.find(x => x.id === hId);
             const f = db.funcionarios.find(x => x.id === h.funcId) || {};
             const printArea = document.getElementById('print-area');
-
             let rows = '';
             if(h.tipo === 'quinzena') {
                 rows = `<tr><td class="p-1">001</td><td class="p-1">ADIANTAMENTO QUINZENAL</td><td class="p-1 text-center">40%</td><td class="p-1 text-right">${h.proventos.toLocaleString('pt-BR', {minimumFractionDigits:2})}</td><td class="p-1">0,00</td></tr>`;
             } else {
                 rows = `
-                    <tr><td class="p-1">001</td><td class="p-1 uppercase">Salário Base</td><td class="p-1 text-center">30D</td><td class="p-1 text-right">${f.salario.toLocaleString('pt-BR', {minimumFractionDigits:2})}</td><td class="p-1"></td></tr>
-                    ${h.detalhes.vInsal > 0 ? `<tr><td class="p-1">062</td><td class="p-1 uppercase">Insalubridade</td><td class="p-1 text-center">20%</td><td class="p-1 text-right">${h.detalhes.vInsal.toLocaleString('pt-BR', {minimumFractionDigits:2})}</td><td class="p-1"></td></tr>` : ''}
+                    <tr><td class="p-1">001</td><td class="p-1">Salário Base</td><td class="p-1 text-center">30D</td><td class="p-1 text-right">${f.salario?.toLocaleString('pt-BR', {minimumFractionDigits:2})}</td><td class="p-1"></td></tr>
+                    ${h.detalhes.vInsal > 0 ? `<tr><td class="p-1">062</td><td class="p-1">Insalubridade</td><td class="p-1 text-center">20%</td><td class="p-1 text-right">${h.detalhes.vInsal.toLocaleString('pt-BR', {minimumFractionDigits:2})}</td><td class="p-1"></td></tr>` : ''}
                     ${h.detalhes.vExtra > 0 ? `<tr><td class="p-1">050</td><td class="p-1 uppercase">Horas Extras 50%</td><td class="p-1 text-center">${h.detalhes.hExStr}</td><td class="p-1 text-right">${h.detalhes.vExtra.toLocaleString('pt-BR', {minimumFractionDigits:2})}</td><td class="p-1"></td></tr>` : ''}
                     ${h.detalhes.vDsr > 0 ? `<tr><td class="p-1">051</td><td class="p-1 uppercase">DSR sobre Extras</td><td class="p-1 text-center"></td><td class="p-1 text-right">${h.detalhes.vDsr.toLocaleString('pt-BR', {minimumFractionDigits:2})}</td><td class="p-1"></td></tr>` : ''}
                     ${h.detalhes.inss > 0 ? `<tr><td class="p-1">901</td><td class="p-1 uppercase">INSS</td><td class="p-1 text-center"></td><td class="p-1"></td><td class="p-1 text-right">${h.detalhes.inss.toLocaleString('pt-BR', {minimumFractionDigits:2})}</td></tr>` : ''}
@@ -425,85 +455,38 @@
                     ${h.detalhes.descEmp > 0 ? `<tr><td class="p-1">950</td><td class="p-1 uppercase">Empréstimo CLT</td><td class="p-1 text-center"></td><td class="p-1"></td><td class="p-1 text-right">${h.detalhes.descEmp.toLocaleString('pt-BR', {minimumFractionDigits:2})}</td></tr>` : ''}
                 `;
             }
-
             printArea.innerHTML = `
                 <div class="holerite-page flex flex-col">
                     <div class="border-2 border-black p-4 mb-2 flex justify-between">
-                        <div>
-                            <h1 class="font-black text-lg">${db.empresa.nome}</h1>
-                            <p class="text-xs">CNPJ: ${db.empresa.cnpj}</p>
-                            <p class="text-xs uppercase">${db.empresa.cidade}</p>
-                        </div>
-                        <div class="text-right">
-                            <h2 class="font-black text-sm uppercase italic">Recibo de Pagamento</h2>
-                            <p class="text-xs">Mês Ref: ${h.mes.split('-').reverse().join('/')}</p>
-                            <span class="text-[10px] font-bold bg-black text-white px-2 py-0.5 mt-1 inline-block">${h.tipo.toUpperCase()}</span>
-                        </div>
+                        <div><h1 class="font-black text-lg">${db.empresa.nome}</h1><p class="text-xs">CNPJ: ${db.empresa.cnpj}</p><p class="text-xs uppercase">${db.empresa.cidade}</p></div>
+                        <div class="text-right"><h2 class="font-black text-sm uppercase italic">Recibo de Pagamento</h2><p class="text-xs">Mês Ref: ${h.mes.split('-').reverse().join('/')}</p><span class="text-[10px] font-bold bg-black text-white px-2 py-0.5 mt-1 inline-block">${h.tipo.toUpperCase()}</span></div>
                     </div>
-                    
                     <div class="border-x-2 border-t-2 border-black grid grid-cols-4 text-[10px] font-bold">
                         <div class="border-r-2 border-black p-1">CADASTRO<br>${f.id?.slice(-4)}</div>
                         <div class="col-span-2 border-r-2 border-black p-1">NOME DO FUNCIONÁRIO<br>${h.nome}</div>
                         <div class="p-1 uppercase">Cargo<br>${h.cargo}</div>
                     </div>
-                    
                     <table class="w-full border-2 border-black text-[10px] mb-4">
-                        <thead class="border-b-2 border-black bg-slate-50 uppercase">
-                            <tr>
-                                <th class="p-1 text-left w-10">Cód.</th>
-                                <th class="p-1 text-left">Descrição</th>
-                                <th class="p-1 w-16 text-center">Ref.</th>
-                                <th class="p-1 w-24 text-right">Proventos</th>
-                                <th class="p-1 w-24 text-right">Descontos</th>
-                            </tr>
-                        </thead>
-                        <tbody class="font-mono">
-                            ${rows}
-                            ${Array(14 - rows.split('<tr>').length).fill('<tr><td colspan="5" class="p-1">&nbsp;</td></tr>').join('')}
-                        </tbody>
-                        <tfoot class="border-t-2 border-black font-bold">
-                            <tr>
-                                <td colspan="3" class="p-1 text-right italic">TOTAIS</td>
-                                <td class="p-1 text-right">R$ ${h.proventos.toLocaleString('pt-BR', {minimumFractionDigits:2})}</td>
-                                <td class="p-1 text-right">R$ ${h.descontos.toLocaleString('pt-BR', {minimumFractionDigits:2})}</td>
-                            </tr>
-                        </tfoot>
+                        <thead class="border-b-2 border-black bg-slate-50 uppercase"><tr><th class="p-1 text-left w-10">Cód.</th><th class="p-1 text-left">Descrição</th><th class="p-1 w-16 text-center">Ref.</th><th class="p-1 w-24 text-right">Proventos</th><th class="p-1 w-24 text-right">Descontos</th></tr></thead>
+                        <tbody class="font-mono">${rows}${Array(12).fill('<tr><td colspan="5" class="p-1">&nbsp;</td></tr>').join('').slice(0, (14 - rows.split('<tr>').length)*37)}</tbody>
+                        <tfoot class="border-t-2 border-black font-bold"><tr><td colspan="3" class="p-1 text-right italic">TOTAIS</td><td class="p-1 text-right">R$ ${h.proventos.toLocaleString('pt-BR', {minimumFractionDigits:2})}</td><td class="p-1 text-right">R$ ${h.descontos.toLocaleString('pt-BR', {minimumFractionDigits:2})}</td></tr></tfoot>
                     </table>
-
                     <div class="flex justify-between items-end mt-auto">
-                        <div class="bg-black text-white p-6 text-center rounded-sm">
-                            <p class="text-[8px] uppercase font-bold opacity-60">Líquido a Receber</p>
-                            <p class="text-3xl font-black tracking-tighter">R$ ${h.liquido.toLocaleString('pt-BR', {minimumFractionDigits:2})}</p>
-                        </div>
-                        <div class="text-center w-2/3">
-                            <p class="text-[9px] mb-10 italic">Declaro ter recebido a importância líquida discriminada neste recibo.</p>
-                            <div class="border-t border-black w-3/4 mx-auto text-[10px] pt-1 uppercase font-bold">
-                                Data: ____/____/_______ &nbsp;&nbsp;&nbsp;&nbsp; Assinatura do Funcionário
-                            </div>
-                        </div>
+                        <div class="bg-black text-white p-6 text-center rounded-sm"><p class="text-[8px] uppercase font-bold opacity-60">Líquido a Receber</p><p class="text-3xl font-black tracking-tighter">R$ ${h.liquido.toLocaleString('pt-BR', {minimumFractionDigits:2})}</p></div>
+                        <div class="text-center w-2/3"><p class="text-[9px] mb-10 italic">Declaro ter recebido a importância líquida discriminada neste recibo.</p><div class="border-t border-black w-3/4 mx-auto text-[10px] pt-1 uppercase font-bold">Data: ____/____/_______ &nbsp;&nbsp;&nbsp;&nbsp; Assinatura do Funcionário</div></div>
                     </div>
                 </div>
             `;
             window.print();
         }
 
-        // --- RENDERIZADORES ---
         function renderFuncionarios() {
             const container = document.getElementById('lista-funcionarios');
             container.innerHTML = db.funcionarios.map(f => `
                 <div class="bg-white p-5 rounded-3xl shadow-sm border border-slate-200">
-                    <div class="flex justify-between mb-4">
-                        <h4 class="font-black text-slate-800 uppercase tracking-tight">${f.nome}</h4>
-                        <div class="flex gap-2">
-                            <button onclick="editFunc('${f.id}')" class="text-slate-300 hover:text-blue-600 transition">⚙️</button>
-                            <button onclick="deleteFunc('${f.id}')" class="text-slate-300 hover:text-red-600 transition">🗑️</button>
-                        </div>
-                    </div>
+                    <div class="flex justify-between mb-4"><h4 class="font-black text-slate-800 uppercase tracking-tight">${f.nome}</h4><div class="flex gap-2"><button onclick="editFunc('${f.id}')" class="text-slate-300 hover:text-blue-600 transition">⚙️</button><button onclick="deleteFunc('${f.id}')" class="text-slate-300 hover:text-red-600 transition">🗑️</button></div></div>
                     <p class="text-[10px] font-bold text-blue-600 uppercase mb-4 tracking-wider">${f.cargo}</p>
-                    <div class="flex justify-between border-t pt-4">
-                        <span class="text-[10px] font-black text-slate-400 uppercase">Salário Base</span>
-                        <span class="font-black text-slate-800">R$ ${f.salario.toLocaleString('pt-BR')}</span>
-                    </div>
+                    <div class="flex justify-between border-t pt-4"><span class="text-[10px] font-black text-slate-400 uppercase">Salário Base</span><span class="font-black text-slate-800">R$ ${f.salario.toLocaleString('pt-BR')}</span></div>
                 </div>
             `).join('');
         }
@@ -512,16 +495,11 @@
             const container = document.getElementById('tabela-lancamento');
             container.innerHTML = db.funcionarios.map(f => `
                 <tr class="border-b hover:bg-slate-50 transition">
-                    <td class="p-4">
-                        <div class="font-bold text-slate-800">${f.nome}</div>
-                        <div class="text-[9px] text-slate-400 uppercase font-black">${f.cargo}</div>
-                    </td>
+                    <td class="p-4"><div class="font-bold text-slate-800">${f.nome}</div><div class="text-[9px] text-slate-400 uppercase font-black">${f.cargo}</div></td>
                     <td class="p-4"><input type="time" id="hex-${f.id}" class="p-2 border rounded-lg text-xs font-bold outline-none w-20"></td>
                     <td class="p-4"><input type="time" id="hfa-${f.id}" class="p-2 border rounded-lg text-xs font-bold outline-none w-20"></td>
                     <td class="p-4"><input type="number" id="emp-${f.id}" placeholder="R$ 0,00" class="p-2 border rounded-lg text-xs font-bold outline-none w-28"></td>
-                    <td class="p-4 text-center">
-                        <button onclick="processarLançamento('${f.id}')" class="bg-blue-600 text-white px-4 py-2 rounded-xl text-[10px] font-black hover:bg-slate-900 transition shadow-md shadow-blue-100 uppercase">Gravar</button>
-                    </td>
+                    <td class="p-4 text-center"><button onclick="processarLançamento('${f.id}')" class="bg-blue-600 text-white px-4 py-2 rounded-xl text-[10px] font-black hover:bg-slate-900 transition shadow-md shadow-blue-100 uppercase">Gravar</button></td>
                 </tr>
             `).join('');
         }
@@ -530,15 +508,9 @@
             const container = document.getElementById('lista-historico');
             container.innerHTML = db.historico.sort((a,b) => b.id - a.id).map(h => `
                 <div class="bg-white p-5 rounded-3xl shadow-sm border border-slate-200 group">
-                    <div class="flex justify-between mb-4">
-                        <span class="text-[8px] font-black px-2 py-1 rounded uppercase ${h.tipo === 'quinzena' ? 'bg-orange-100 text-orange-600' : 'bg-blue-100 text-blue-600'}">${h.tipo} • ${h.mes}</span>
-                        <button onclick="imprimir('${h.id}')" class="text-blue-600 hover:scale-110 transition">🖨️</button>
-                    </div>
+                    <div class="flex justify-between mb-4"><span class="text-[8px] font-black px-2 py-1 rounded uppercase ${h.tipo === 'quinzena' ? 'bg-orange-100 text-orange-600' : 'bg-blue-100 text-blue-600'}">${h.tipo} • ${h.mes}</span><button onclick="imprimir('${h.id}')" class="text-blue-600 hover:scale-110 transition">🖨️</button></div>
                     <h4 class="font-bold text-slate-800 text-sm mb-4 truncate">${h.nome}</h4>
-                    <div class="flex justify-between items-end border-t pt-4">
-                        <span class="text-[9px] font-black text-slate-400 uppercase">Valor Líquido</span>
-                        <span class="text-lg font-black text-slate-900 tracking-tighter">R$ ${h.liquido.toLocaleString('pt-BR', {minimumFractionDigits:2})}</span>
-                    </div>
+                    <div class="flex justify-between items-end border-t pt-4"><span class="text-[9px] font-black text-slate-400 uppercase">Valor Líquido</span><span class="text-lg font-black text-slate-900 tracking-tighter">R$ ${h.liquido.toLocaleString('pt-BR', {minimumFractionDigits:2})}</span></div>
                 </div>
             `).join('');
         }
